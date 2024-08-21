@@ -169,10 +169,8 @@ do{
     cin.ignore();
     cin.getline(aux->libros.id, 5);
     cout << "Ingrese el titulo del libro (30 caracteres)\n";
-
     cin.getline(aux->libros.titulo, 29);
     cout << "Ingrese el Autor del libro (25 caracteres)\n";
-
     cin.getline(aux->libros.autor, 24);
     cout << "Ingrese el año de publicación\n";
     cin >> aux->libros.año_pub;
