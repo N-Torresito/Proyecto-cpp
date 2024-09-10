@@ -4,123 +4,128 @@
 #include <cstring>
 using namespace std;
 
+/*
+La manera en que se manejan los datos en el archivo binario y en el archivo de texto será de la siguiente forma:
+cantidad de libros
+cantidad de usuarios
+cantidad de prestamos
+cantidad de devoluciones
+lista de libros (Arreglo dinamico)
+lista de usuarios (Arreglo dinamico)
+lista de prestamos (Arreglo dinamico)
+lista de devoluciones (Arreglo dinamico)
+
+The way the data is handled in the binary file and in the text file will be as follows:
+number of books
+number of users
+number of loans
+number of returns
+list of books (dynamic array)
+list of users (dynamic array)
+list of loans (dynamic array)
+list of returns (dynamic array)
+*/
+
 struct libro {
- char id[5];
- char titulo[30];
- char autor[25];
- int año_pub;
- int cant_copias;
+    char id[6];
+    char titulo[31];
+    char autor[26];
+    int año_pub;
+    int cant_copias;
 };
 
 struct usuario {
- char id[15];
- char t_id;
- char nombre[25];
- char direccion[30];
- char telefono[10];
- char f_nacimiento[10];
- char p_nacimiento[20];
+    char id[16];
+    char t_id;
+    char nombre[26];
+    char direccion[31];
+    char telefono[11];
+    char f_nacimiento[11];
+    char p_nacimiento[21];
 };
 
 struct prestamo{
- char id_prestamo[3];
- char id_usuario[15];
- char id_libro[5];
- char f_prestamo[10];
- char f_devolucion[10];
+    char id_prestamo[4];
+    char id_usuario[16];
+    char id_libro[6];
+    char f_prestamo[11];
+    char f_devolucion[11];
 };
 
 struct devolucion{
- char id_devolucion[3];
- char f_devolucion[10];
- int pago_pend = 0;
+    char id_devolucion[4];
+    char f_devolucion[11];
+    int pago_pend = 0;
 };
 
-struct l_libros {
- libro libros;
- l_libros* siguiente = nullptr;
+struct lista_m{
+    libro* l_libros;
+    usuario* l_usuarios;
+    prestamo* l_prestamos;
+    devolucion* l_devolucion;
+    int cant_libros;
+    int cant_usuarios;
+    int cant_prestamo;
+    int cant_devolución;
 };
 
-struct l_usuario{
- usuario usuario;
- l_usuario* siguiente = nullptr;
-};
+void menu(lista_m* &lista, fstream*& in);
+void visualizar_datos(lista_m* &lista);
+void cargar_datos(lista_m* &lista, fstream* &in);
+void guardar_datos(lista_m* &lista, fstream* &out);
+void agregar_libros(libro* &l_libros, int &tam);
+void imprimir_libros(libro* &l_libros, int tam);
 
-struct l_prestamo{
- prestamo prestamo;
- l_prestamo* siguiente = nullptr;
-};
-
-struct l_devolucion{
- devolucion devolucion;
- l_devolucion* siguiente = nullptr;
-};
-
-struct cant_l{
- int cant_libros;
- int cant_usuarios;
- int cant_prestamo;
- int cant_devolución;
-};
-
-void menu(l_devolucion* &dev, l_libros* &lib, l_prestamo* &pres, l_usuario* &usu, fstream*& in);
-void visualizar_datos(l_devolucion* &dev, l_libros* &lib, l_prestamo* &pres, l_usuario* &usu);
-void agregar_datos();
-void cargar_datos(l_devolucion* &dev, l_libros* &lib, l_prestamo* &pres, l_usuario &usu, fstream*& in);
-void guardar_datos(l_devolucion* &dev, l_libros* &lib, l_prestamo* &pres, l_usuario* &usu, fstream* &out);
-void agregar_libros(l_libros* &lib);
-void imprimir_libros(l_libros* inicial);
-
-void menu (l_devolucion* &dev, l_libros* &lib, l_prestamo* &pres, l_usuario* &usu, fstream*& in){
+void menu(lista_m* &lista, fstream*& in){
 int select = 5;
-do{
-    system("cls");
-    cout << setw(50)<< setfill('*') <<"*" << '\n';
-    cout << setw(35) << setfill(' ') << right << "Gestion de Biblioteca V0.1" << '\n';
-    cout << setw(50)<< setfill('*') <<"*" << "\n\n";
-    cout << "Bienvenido/a, elija alguna opción\n\n";
+    do{
+        system("cls");
+        cout << setw(50)<< setfill('*') <<"*" << '\n';
+        cout << setw(35) << setfill(' ') << right << "Gestion de Biblioteca V0.2" << '\n';
+        cout << setw(50)<< setfill('*') <<"*" << "\n\n";
+        cout << "Bienvenido/a, elija alguna opción\n\n";
 
-    cout << "1. Visualizar Datos Generales\n";
-    cout << "2. Agregar Libros\n";
-    cout << "3. Registrar Usuarios\n";
-    cout << "4. Registrar Prestamo\n";
-    cout << "5. Salir\n\n";
+        cout << "1. Visualizar Datos Generales\n";
+        cout << "2. Agregar Libros\n";
+        cout << "3. Registrar Usuarios\n";
+        cout << "4. Registrar Prestamo\n";
+        cout << "5. Salir\n\n";
 
-    cout << "Selección: ";
-    cin >> select;
-    cout << "\n\n";
+        cout << "Selección: ";
+        cin >> select;
+        cout << "\n\n";
 
-    switch (select)
-    {
-    case 1:
-        visualizar_datos(dev, lib, pres, usu);
-        break;
+        switch (select)
+        {
+        case 1:
+            visualizar_datos(lista);
+            break;
 
-    case 2:
-        agregar_libros(lib);
-        break;
+        case 2:
+            agregar_libros(lista->l_libros, lista->cant_libros);
+            break;
 
-    case 3:
-        /* code */
-        break;
+        case 3:
+            /* code */
+            break;
 
-    case 4:
-        /* code */
-        break;
+        case 4:
+            /* code */
+            break;
 
-    case 5:
-        break;
+        case 5:
+            break;
 
-    default:
-        cout << "Opción invalida, ingrese otra opción\n";
-        break;
-    }
-}while(select !=5 );
+        default:
+            cout << "Opción invalida, ingrese otra opción\n";
+            break;
+        }
+    }while(select !=5 );
 }
 
-void visualizar_datos(l_devolucion* &dev, l_libros* &lib, l_prestamo* &pres, l_usuario* &usu){
-    int select;
+void visualizar_datos(lista_m* &lista){
     system("cls");
+    int select;
     cout << "Ingrese que datos desea visualizar\n";
     
     cout << "1. Libros\n";
@@ -135,7 +140,7 @@ void visualizar_datos(l_devolucion* &dev, l_libros* &lib, l_prestamo* &pres, l_u
     switch (select)
     {
     case 1:
-        imprimir_libros(lib);
+        imprimir_libros(lista->l_libros, lista->cant_libros);
         break;
 
     case 2:
@@ -159,35 +164,36 @@ void visualizar_datos(l_devolucion* &dev, l_libros* &lib, l_prestamo* &pres, l_u
     }
 }
 
-void agregar_libros(l_libros* &lib)
+void agregar_libros(libro* &l_libros, int &tam)
 {
 char select = 'n';
 do{
     system("cls");
-    l_libros* aux = new l_libros;
+    libro* aux = new libro();
     cout << "Ingrese el Id del libro (5 caracteres)\n";
     cin.ignore();
-    cin.getline(aux->libros.id, 5);
+    cin.getline(aux->id, 6);
     cout << "Ingrese el titulo del libro (30 caracteres)\n";
-    cin.getline(aux->libros.titulo, 29);
+    cin.getline(aux->titulo, 31);
     cout << "Ingrese el Autor del libro (25 caracteres)\n";
-    cin.getline(aux->libros.autor, 24);
+    cin.getline(aux->autor, 26);
     cout << "Ingrese el año de publicación\n";
-    cin >> aux->libros.año_pub;
+    cin >> aux->año_pub;
     cout << "Ingrese la cantidad de copias\n";
-    cin >> aux->libros.cant_copias;
+    cin >> aux->cant_copias;
 
-    if(lib == nullptr)
-        {
-            lib = aux;	
-        }else{
-            l_libros* temp = lib;
-            while(temp->siguiente != nullptr)
-            {
-                temp = temp->siguiente;
-            }
-            temp->siguiente = aux;
+    if(tam == 0){
+        l_libros = aux;
+        tam++;
+    } else {
+        libro* copia = new libro[tam+1];
+        *(copia+tam) = *aux;
+        for(int i = 0; i < tam; i++){
+            *(copia+i) = *(l_libros+i);
         }
+        l_libros = copia;
+        tam++;
+    }
 
     cout << "Libro añadido exitosamente!\n";
     cout << "¿Desea añadir otro libro? (y/n)" << endl;
@@ -196,36 +202,22 @@ do{
 }while(select != 'n');
 }
 
-void cargar_datos(l_devolucion* &dev, l_libros* &lib, l_prestamo* &pres, l_usuario &usu, fstream*& in){
+void cargar_datos(lista_m* &lista, fstream*& in){
 
-in->open("devolucion.dat", ios::in);
-
+in->open("biblioteca.dat", ios::in);
 
 if (!in->fail())
 {
-    while(in->eof())
-    {
-        l_devolucion* nuevo = new l_devolucion();
-        in->read((char*) dev, sizeof(devolucion));
 
-
-
-        dev = dev->siguiente; 
-
-    }
 }
 
 
 
 }
 
-void guardar_datos(l_devolucion* &dev, l_libros* &lib, l_prestamo* &pres, l_usuario* &usu, fstream* &out){
+void guardar_datos(lista_m* &lista, fstream* &out){
 
 
-
-}
-
-void agregar_libros(){
 
 }
 
@@ -233,12 +225,16 @@ void imprimir_datos(){
 
 }
 
-void imprimir_libros(l_libros* inicial) {
-    l_libros* temp = inicial;
-    while (temp != nullptr) {
-        cout<<temp->libros.id << " " << temp->libros.titulo << " " << temp->libros.autor << '\n';
-        temp = temp->siguiente;
+void imprimir_libros(libro* &l_libros, int tam){
+    
+    if (tam != 0) {
+        for(int i = 0; i < tam; i++){
+        cout<<(l_libros+i)->id << " " << (l_libros+i)->titulo << " " << (l_libros+i)->autor << '\n';
+        } 
+    } else {
+        cout << "No hay libros registrados\n";
     }
+
     cout<<endl;
     system("pause");
 }
