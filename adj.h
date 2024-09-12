@@ -245,15 +245,18 @@ void imprimir_datos(){
 }
 
 void imprimir_libros(libro* &l_libros, int tam){
-    
-    if (tam != 0) {
-        for(int i = 0; i < tam; i++){
-        cout<<(l_libros+i)->id << " " << (l_libros+i)->titulo << " " << (l_libros+i)->autor << '\n';
-        } 
-    } else {
-        cout << "No hay libros registrados\n";
-    }
-
+    cout << setfill(' ') << left << setw(3) << "ID" << setw(32) << "Titulo"
+    << setw(25) << "Autor" << setw(7) << "Año"
+     << setw(20) << "Copias disponibles" << '\n';
+        if (tam != 0) {
+            for(int i = 0; i < tam; i++){
+            cout<< setfill(' ') << setw(3) << (l_libros+i)->id << setw(32) << (l_libros+i)->titulo 
+            << setw(25) << (l_libros+i)->autor << setw(7) << (l_libros+i)->año_pub <<
+            setw(20) << (l_libros+i)->cant_copias <<'\n';
+            } 
+        } else {
+            cout << "No hay libros registrados\n";
+        }
     cout<<endl;
     system("pause");
 }
