@@ -164,42 +164,61 @@ void visualizar_datos(lista_m* &lista){
     }
 }
 
-void agregar_libros(libro* &l_libros, int &tam)
-{
-char select = 'n';
-do{
-    system("cls");
-    libro* aux = new libro();
-    cout << "Ingrese el Id del libro (5 caracteres)\n";
-    cin.ignore();
-    cin.getline(aux->id, 6);
-    cout << "Ingrese el titulo del libro (30 caracteres)\n";
-    cin.getline(aux->titulo, 31);
-    cout << "Ingrese el Autor del libro (25 caracteres)\n";
-    cin.getline(aux->autor, 26);
-    cout << "Ingrese el año de publicación\n";
-    cin >> aux->año_pub;
-    cout << "Ingrese la cantidad de copias\n";
-    cin >> aux->cant_copias;
+void agregar_libros(libro* &l_libros, int &tam){
+    char select = 'n';
+    do{
+        system("cls");
+        libro* aux = new libro();
+        string id = to_string( tam+1);
+        strcpy(aux->id, id.data());
+        cout << "Ingrese el titulo del libro (30 caracteres)\n";
+        cin.ignore();
+        cin.getline(aux->titulo, 31);
+        cout << "Ingrese el Autor del libro (25 caracteres)\n";
+        cin.getline(aux->autor, 26);
+        cout << "Ingrese el año de publicación\n";
+        cin >> aux->año_pub;
+        cout << "Ingrese la cantidad de copias\n";
+        cin >> aux->cant_copias;
 
-    if(tam == 0){
-        l_libros = aux;
-        tam++;
-    } else {
-        libro* copia = new libro[tam+1];
-        *(copia+tam) = *aux;
-        for(int i = 0; i < tam; i++){
-            *(copia+i) = *(l_libros+i);
+        if(tam == 0){
+            l_libros = aux;
+            tam++;
+        } else {
+
+            for (int i = 0; i < tam; i++){
+                if(strcmp((l_libros+i)->titulo,aux->titulo) == 0){
+                    int respuesta = 0;
+                    cout << "\nSe ha encontrado un libro con el mismo titulo, Seleccione una opción:\n\n";
+                    cout << "1. Desea aumentar la cantidad de copias de: \n";
+                    cout << (l_libros+i)->titulo << " - Autor:" << (l_libros+i)->autor << "- Año de publicación:" << (l_libros+i)->año_pub << '\n';
+                    cout << "2. Ingresar el libro cómo una nueva edición/otro libro\n";
+                    cin >> respuesta;
+                    if(respuesta == 1){
+                        (l_libros+tam)->cant_copias += aux->cant_copias;
+                        cout << "¡Se han añadido exitosamente las copias del libro!\n";
+                        system("pause");
+                        return;
+                    } else {
+                        break;
+                    }
+                }
+            }
+
+            libro* copia = new libro[tam+1];
+            *(copia+tam) = *aux;
+            for(int i = 0; i < tam; i++){
+                *(copia+i) = *(l_libros+i);
+            }
+            l_libros = copia;
+            tam++;
+            cout << "Libro añadido exitosamente!\n";
         }
-        l_libros = copia;
-        tam++;
-    }
-
-    cout << "Libro añadido exitosamente!\n";
-    cout << "¿Desea añadir otro libro? (y/n)" << endl;
-    cin >> select;
-    select = tolower(select);
-}while(select != 'n');
+        
+        cout << "¿Desea añadir otro libro? (y/n)" << endl;
+        cin >> select;
+        select = tolower(select);
+    }while(select != 'n');
 }
 
 void cargar_datos(lista_m* &lista, fstream*& in){
