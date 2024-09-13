@@ -80,9 +80,13 @@ void imprimir_libros(libro* &l_libros, int tam);
 int calcular_tiempo(char* fecha, char select);
 void imprimir_usuarios(usuario* &l_usuarios, int tam);
 void agregar_usuarios(usuario* &l_usuarios, int &tam);
+void imprimir_prestamo(prestamo* &l_prestamo, int &tam);
+void realizar_prestamo(prestamo* &l_prestamos, int &tam_prestamos, libro* &l_libros, int &tam_libros, usuario* &l_usuarios, int &tam_usuarios);
+
 
 void menu(lista_m* &lista, fstream*& in){
-int select = 5;
+    fflush(stdin);
+    int select = 5;
     do{
         system("cls");
         cout << setw(50)<< setfill('*') <<"*" << '\n';
@@ -115,7 +119,7 @@ int select = 5;
             break;
 
         case 4:
-            /* code */
+            realizar_prestamo(lista->l_prestamos, lista->cant_prestamo, lista->l_libros, lista->cant_libros, lista->l_usuarios, lista->cant_usuarios);
             break;
 
         case 5:
@@ -129,6 +133,7 @@ int select = 5;
 }
 
 void visualizar_datos(lista_m* &lista){
+    fflush(stdin);
     system("cls");
     int select;
     cout << "Ingrese que datos desea visualizar\n";
@@ -153,7 +158,7 @@ void visualizar_datos(lista_m* &lista){
         break;
 
     case 3:
-        /* code */
+        imprimir_prestamo(lista->l_prestamos, lista->cant_prestamo);
         break;
 
     case 4:
@@ -170,6 +175,7 @@ void visualizar_datos(lista_m* &lista){
 }
 
 void agregar_libros(libro* &l_libros, int &tam){
+    fflush(stdin);
     char select = 'n';
     do{
         system("cls");
@@ -234,11 +240,11 @@ void agregar_libros(libro* &l_libros, int &tam){
         cout << "¿Desea añadir otro libro? (y/n)" << endl;
         cin >> select;
         select = tolower(select);
-        cin.clear();
     }while(select != 'n');
 }
 
 void agregar_usuarios(usuario* &l_usuarios, int &tam){
+    fflush(stdin);
     char select = 'n';
     do{
         system("cls");
@@ -314,9 +320,7 @@ void agregar_usuarios(usuario* &l_usuarios, int &tam){
 }
 
 void cargar_datos(lista_m* &lista, fstream*& in){
-
-    in->open("biblioteca.dat", ios::in);
-
+    in->open("biblioteca.dat", ios::in);    
     if (!in->fail())
     {
 
@@ -328,19 +332,14 @@ void cargar_datos(lista_m* &lista, fstream*& in){
 
 void guardar_datos(lista_m* &lista, fstream* &out){
 
-
-
-}
-
-void imprimir_datos(){
-
 }
 
 void imprimir_libros(libro* &l_libros, int tam){
+    fflush(stdin);
     cout << setfill(' ') << left << setw(7) << "ID" << setw(32) << "Titulo"
     << setw(25) << "Autor" << setw(7) << "Año"
-     << setw(20) << "Copias disponibles" << '\n';
-        if (tam != 0) {
+     << setw(20) << "Copias disponibles" << endl;
+        if (tam != 0 && l_libros != nullptr) {
             for(int i = 0; i < tam; i++){
             cout<< setfill(' ') << setw(7) << (l_libros+i)->id << setw(32) << (l_libros+i)->titulo 
             << setw(25) << (l_libros+i)->autor << setw(7) << (l_libros+i)->año_pub <<
@@ -356,6 +355,7 @@ void imprimir_libros(libro* &l_libros, int tam){
 int calcular_tiempo(char* fecha, char select){
 //Will use 'select' variable to interchange between days and years 
 //Se usa 'select' para cambiar entre dias y años en el valor de retorno
+    fflush(stdin);
     char* aux = new char[11];
     strcpy(aux, fecha);
     time_t ahora = time(NULL);
@@ -384,17 +384,118 @@ int calcular_tiempo(char* fecha, char select){
 }
 
 void imprimir_usuarios(usuario* &l_usuarios, int tam){
-    cout << setfill(' ') << left << setw(26) << "Nombre" << setw(13) << "Telefono"
-    << setw(23) << "Id\n";
+    fflush(stdin);
+    cout << setfill(' ') << left << setw(26) << "Nombre" << setw(13) << "Telefono" << "Id\n";
 
-        if (tam != 0) {
+        if (tam != 0 && l_usuarios != nullptr) {
             for(int i = 0; i < tam; i++){
-            cout<< setfill(' ') << setw(26) << (l_usuarios+i)->nombre << setw(13) << (l_usuarios+i)->telefono 
+            cout<< setfill(' ') << left << setw(26) << (l_usuarios+i)->nombre << setw(13) << (l_usuarios+i)->telefono 
             << setw(3) << (l_usuarios+i)->t_id << setw(20) << (l_usuarios+i)->id << endl;
             } 
         } else {
-            cout << "No hay suarios Registrados\n";
+            cout << "No hay usuarios registrados\n";
         }
     cout<<endl;
     system("pause");
 }
+
+void realizar_prestamo(prestamo* &l_prestamos, int &tam_prestamos, libro* &l_libros, int &tam_libros, usuario* &l_usuarios, int &tam_usuarios){
+    fflush(stdin);
+    system("cls");
+    prestamo* aux = new prestamo();
+    bool existe = false;
+
+    cout << "Ingrese el Id del libro para el prestamo\n";
+    cin.ignore();
+    cin.getline(aux->id_libro, 6);
+
+        for (int i = 0; i < tam_libros; i++){
+            if(strcmp((l_libros+i)->id,aux->id_libro) == 0 && (l_libros+i)->cant_copias!= 0){
+                existe = true;
+                break;
+            }
+        }
+
+        if(!existe){
+            cout << "No se ha encontrado un libro con el Id ingresado o no tiene copias disponibles, regresando al menu principal\n";
+            system("pause");
+            return;
+        }
+
+    cout << "Ingrese el Id del usuario\n";
+    cin.getline(aux->id_usuario, 16);
+
+        existe = false;
+        for (int i = 0; i < tam_usuarios; i++){
+            if(strcmp((l_usuarios+i)->id,aux->id_usuario) == 0){
+                existe = true;
+            }
+        }
+
+        if(!existe){
+            cout << "No se ha encontrado al usuario con el Id ingresado, regresando al menu principal\n";
+            system("pause");
+            return;
+        }
+
+    cout << "Ingrese un Id para el prestamo (3 caracteres)\n";
+    cin.getline(aux->id_prestamo, 4);
+
+    cout << "Ingrese la fecha del prestamo (Formato aaaa/mm/dd, Ej. 2012/12/24)\n";
+    cin.getline(aux->f_prestamo, 11);
+
+    cout << "Ingrese la fecha de devolución esperada del prestamo(Formato aaaa/mm/dd, Ej. 2012/12/24)\n";
+    cin.getline(aux->f_devolucion, 21);
+        
+    if(tam_prestamos == 0){
+        l_prestamos = aux;
+        tam_prestamos++;
+        
+    } else {
+
+        for (int i = 0; i < tam_prestamos; i++){
+            if(strcmp((l_prestamos+i)->id_prestamo,aux->id_prestamo) == 0){
+                cout << "Se ha encontrado otro prestamo con el mismo Id que el actual, saliendo al menú principal\n";
+                system("pause");
+                return;
+            }
+        }
+
+        prestamo* copia = new prestamo[tam_prestamos+1];
+        *(copia+tam_prestamos) = *aux;
+        for(int i = 0; i < tam_prestamos; i++){
+            *(copia+i) = *(l_prestamos+i);
+        }
+        delete[] l_usuarios;
+        l_prestamos = copia;
+        tam_prestamos++;
+
+        for (int i = 0; i < tam_libros; i++){
+            if(strcmp((l_libros+i)->id,aux->id_libro) == 0){
+                (l_libros+i)->cant_copias--;
+                break;
+            }
+        }
+
+        cout << "Prestamo realizado exitosamente!\n";
+        system("pause");
+    }
+}
+
+void imprimir_prestamo(prestamo* &l_prestamo, int &tam){
+    fflush(stdin);
+    cout<< setfill(' ') << left << setw(6) << "Prestamo #" << setw(18) << "Usuario #" 
+        << setw(8) << "Libro #" << setw(12) << "Fecha del Prestamo" << endl;
+
+    if (tam != 0 && l_prestamo != nullptr) {
+        for(int i = 0; i < tam; i++){
+        cout<< setfill(' ') << left << setw(6) << (l_prestamo+i)->id_prestamo << setw(18) << (l_prestamo+i)->id_usuario 
+        << setw(8) << (l_prestamo+i)->id_libro << setw(12) << (l_prestamo+i)->f_prestamo << endl;
+        } 
+    } else {
+        cout << "No hay prestamos registrados\n";
+    }
+cout<<endl;
+system("pause");
+}
+
