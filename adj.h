@@ -2,6 +2,8 @@
 #include <iomanip>
 #include <iostream>
 #include <cstring>
+#include <time.h>
+#include <math.h>
 using namespace std;
 
 /*
@@ -75,6 +77,9 @@ void cargar_datos(lista_m* &lista, fstream* &in);
 void guardar_datos(lista_m* &lista, fstream* &out);
 void agregar_libros(libro* &l_libros, int &tam);
 void imprimir_libros(libro* &l_libros, int tam);
+int calcular_tiempo(char* fecha, char select);
+void imprimir_usuarios(usuario* &l_usuarios, int tam);
+void agregar_usuarios(usuario* &l_usuarios, int &tam);
 
 void menu(lista_m* &lista, fstream*& in){
 int select = 5;
@@ -106,7 +111,7 @@ int select = 5;
             break;
 
         case 3:
-            /* code */
+            agregar_usuarios(lista->l_usuarios, lista->cant_usuarios);
             break;
 
         case 4:
@@ -144,7 +149,7 @@ void visualizar_datos(lista_m* &lista){
         break;
 
     case 2:
-        /* code */
+        imprimir_usuarios(lista->l_usuarios, lista->cant_usuarios);
         break;
 
     case 3:
@@ -169,10 +174,19 @@ void agregar_libros(libro* &l_libros, int &tam){
     do{
         system("cls");
         libro* aux = new libro();
-        string id = to_string( tam+1);
-        strcpy(aux->id, id.data());
-        cout << "Ingrese el titulo del libro (30 caracteres)\n";
+        cout << "Ingrese el Id del nuevo libro (5 caracteres)\n";
         cin.ignore();
+        cin.getline(aux->id, 6);
+
+        for (int i = 0; i < tam; i++){
+            if(strcmp((l_libros+i)->id,aux->id) == 0){
+                cout << "Se ha encontrado un libro existente con un Id igual al ingresado," 
+                << "intente denuevo con otro Id o elimine el libro existente con ese Id\n";
+                return;
+            }
+        }
+
+        cout << "Ingrese el titulo del libro (30 caracteres)\n";
         cin.getline(aux->titulo, 31);
         cout << "Ingrese el Autor del libro (25 caracteres)\n";
         cin.getline(aux->autor, 26);
@@ -180,6 +194,7 @@ void agregar_libros(libro* &l_libros, int &tam){
         cin >> aux->año_pub;
         cout << "Ingrese la cantidad de copias\n";
         cin >> aux->cant_copias;
+        
 
         if(tam == 0){
             l_libros = aux;
@@ -210,6 +225,7 @@ void agregar_libros(libro* &l_libros, int &tam){
             for(int i = 0; i < tam; i++){
                 *(copia+i) = *(l_libros+i);
             }
+            delete[] l_libros;
             l_libros = copia;
             tam++;
             cout << "Libro añadido exitosamente!\n";
@@ -218,15 +234,91 @@ void agregar_libros(libro* &l_libros, int &tam){
         cout << "¿Desea añadir otro libro? (y/n)" << endl;
         cin >> select;
         select = tolower(select);
+        cin.clear();
+    }while(select != 'n');
+}
+
+void agregar_usuarios(usuario* &l_usuarios, int &tam){
+    char select = 'n';
+    do{
+        system("cls");
+        usuario* aux = new usuario();
+        
+        cout << "Ingrese el Nombre del usuario (25 caracteres)\n";
+        cin.ignore();
+        cin.getline(aux->nombre, 26);
+        cout << "Ingrese la Dirección del usuario\n";
+        cin.getline(aux->direccion, 31);
+        cout << "Ingrese el telefono movil del usuario\n";
+        cin.getline(aux->telefono, 11);
+        cout << "Ingrese el país de nacimiento del usuario\n";
+        cin.getline(aux->p_nacimiento, 21);
+        cout << "Ingrese la fecha de nacimiento del usuario (Formato aaaa/mm/dd, Ej. 2012/12/24)\n";
+        cin.getline(aux->f_nacimiento, 11);
+
+        if(calcular_tiempo(aux->f_nacimiento, 'a') < 7){
+            cout << "El usuario es muy joven para ser registrado\n";
+            delete aux;
+            system("pause");
+            return;
+        } else if (calcular_tiempo(aux->f_nacimiento, 'a') > 17){
+            cout << "Se ha detectado que el usuario es mayor de edad\n"
+            << "Ingrese el tipo cedula del usuario 'C' para cédula de ciudadania, 'E' para cédula de extranjeria\n";
+            cin.get(aux->t_id);
+        } else if (strcmp(aux->p_nacimiento, "Colombia") == 0 || strcmp(aux->p_nacimiento, "colombia") == 0)  {
+            cout << "Se ha detectado que el usuario es menor de edad y ciudadano Colombiano,"
+                 << " se le ha asignado automaticamente I para tarjeta de identidad\n";
+        } else {
+            cout << "Se ha detectado que el usuario no cumple con los requisitos para ser registrado,"
+                 << " saliendo del modulo de registro\n";
+            delete aux;
+            system("pause");
+            return;
+        }
+
+        cout << "Ingrese el Id del usuario (15 caracteres)\n";
+        cin.ignore();
+        cin.getline(aux->id, 16);
+
+        if(tam == 0){
+            l_usuarios = aux;
+            tam++;
+        } else {
+
+            for (int i = 0; i < tam; i++){
+                if(strcmp((l_usuarios+i)->id,aux->id) == 0){
+                    cout << "Se ha encontrado un usuario con el mismo número de Id que el actual\n"
+                    << "Comuniquese con servicio al cliente si cree que esto es un error\n"
+                    << "Saliendo del modulo de registro\n";
+                    system("pause");
+                    return;
+                }
+            }
+
+            usuario* copia = new usuario[tam+1];
+            *(copia+tam) = *aux;
+            for(int i = 0; i < tam; i++){
+                *(copia+i) = *(l_usuarios+i);
+            }
+            delete[] l_usuarios;
+            l_usuarios = copia;
+            tam++;
+            cout << "Usuario añadido exitosamente!\n";
+        }
+
+        cout << "¿Desea añadir otro usuario? (y/n)" << endl;
+        cin >> select;
+        select = tolower(select);
+        
     }while(select != 'n');
 }
 
 void cargar_datos(lista_m* &lista, fstream*& in){
 
-in->open("biblioteca.dat", ios::in);
+    in->open("biblioteca.dat", ios::in);
 
-if (!in->fail())
-{
+    if (!in->fail())
+    {
 
 }
 
@@ -245,17 +337,63 @@ void imprimir_datos(){
 }
 
 void imprimir_libros(libro* &l_libros, int tam){
-    cout << setfill(' ') << left << setw(3) << "ID" << setw(32) << "Titulo"
+    cout << setfill(' ') << left << setw(7) << "ID" << setw(32) << "Titulo"
     << setw(25) << "Autor" << setw(7) << "Año"
      << setw(20) << "Copias disponibles" << '\n';
         if (tam != 0) {
             for(int i = 0; i < tam; i++){
-            cout<< setfill(' ') << setw(3) << (l_libros+i)->id << setw(32) << (l_libros+i)->titulo 
+            cout<< setfill(' ') << setw(7) << (l_libros+i)->id << setw(32) << (l_libros+i)->titulo 
             << setw(25) << (l_libros+i)->autor << setw(7) << (l_libros+i)->año_pub <<
             setw(20) << (l_libros+i)->cant_copias <<'\n';
             } 
         } else {
             cout << "No hay libros registrados\n";
+        }
+    cout<<endl;
+    system("pause");
+}
+
+int calcular_tiempo(char* fecha, char select){
+//Will use 'select' variable to interchange between days and years 
+//Se usa 'select' para cambiar entre dias y años en el valor de retorno
+    char* aux = new char[11];
+    strcpy(aux, fecha);
+    time_t ahora = time(NULL);
+    tm* tm_fecha = localtime(&ahora);
+    char* token = strtok(aux, "/");
+    tm_fecha->tm_year = (stoi(token) - 1900);
+    token = strtok(NULL, "/");
+    tm_fecha->tm_mon = (stoi(token) - 1);
+    token = strtok(NULL, "/");
+    tm_fecha->tm_mday = stoi(token);
+    token = strtok(NULL, "/");
+    
+    unsigned tiempo = difftime(ahora, mktime(tm_fecha));
+
+    delete[] aux;
+
+    tiempo /= 60;
+    tiempo /= 60;
+    tiempo /= 24;
+        if(select != 'a'){return tiempo;}
+    tiempo /= 30.436875; 
+    //No todos los meses tienen 30 días exactamente por lo que se toma un aproximado de la cantidad de dias en un mes
+    //Not every months have 30 days, so I took an aproximate to how many days are in a month 
+    tiempo /= 12;
+        return tiempo;
+}
+
+void imprimir_usuarios(usuario* &l_usuarios, int tam){
+    cout << setfill(' ') << left << setw(26) << "Nombre" << setw(13) << "Telefono"
+    << setw(23) << "Id\n";
+
+        if (tam != 0) {
+            for(int i = 0; i < tam; i++){
+            cout<< setfill(' ') << setw(26) << (l_usuarios+i)->nombre << setw(13) << (l_usuarios+i)->telefono 
+            << setw(3) << (l_usuarios+i)->t_id << setw(20) << (l_usuarios+i)->id << endl;
+            } 
+        } else {
+            cout << "No hay suarios Registrados\n";
         }
     cout<<endl;
     system("pause");
