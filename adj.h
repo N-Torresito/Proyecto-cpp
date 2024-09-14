@@ -55,20 +55,21 @@ struct prestamo{
 };
 
 struct devolucion{
+    char id_prestamo[4];
     char id_devolucion[4];
     char f_devolucion[11];
     int pago_pend = 0;
 };
 
 struct lista_m{
-    libro* l_libros;
-    usuario* l_usuarios;
-    prestamo* l_prestamos;
-    devolucion* l_devolucion;
-    int cant_libros;
-    int cant_usuarios;
-    int cant_prestamo;
-    int cant_devolución;
+    libro* l_libros = nullptr;
+    usuario* l_usuarios= nullptr;
+    prestamo* l_prestamos= nullptr;
+    devolucion* l_devolucion= nullptr;
+    int cant_libros = 0;
+    int cant_usuarios = 0;
+    int cant_prestamo = 0;
+    int cant_devolución = 0;
 };
 
 void menu(lista_m* &lista, fstream*& in);
@@ -82,7 +83,9 @@ void imprimir_usuarios(usuario* &l_usuarios, int tam);
 void agregar_usuarios(usuario* &l_usuarios, int &tam);
 void imprimir_prestamo(prestamo* &l_prestamo, int &tam);
 void realizar_prestamo(prestamo* &l_prestamos, int &tam_prestamos, libro* &l_libros, int &tam_libros, usuario* &l_usuarios, int &tam_usuarios);
-
+char* dar_fecha_actual();
+void devolver_libros(devolucion* &l_devolucion, int &tam_devolucion, prestamo* &l_prestamos, int &tam_prestamo, usuario* &l_usuarios, int &tam_usuarios, libro* &l_libros, int tam);
+void imprimir_devoluciones(devolucion* &l_devoluciones, int &tam);
 
 void menu(lista_m* &lista, fstream*& in){
     fflush(stdin);
@@ -98,7 +101,8 @@ void menu(lista_m* &lista, fstream*& in){
         cout << "2. Agregar Libros\n";
         cout << "3. Registrar Usuarios\n";
         cout << "4. Registrar Prestamo\n";
-        cout << "5. Salir\n\n";
+        cout << "5. Registrar Devoluciones\n";
+        cout << "6. Salir\n\n";
 
         cout << "Selección: ";
         cin >> select;
@@ -123,13 +127,17 @@ void menu(lista_m* &lista, fstream*& in){
             break;
 
         case 5:
+            devolver_libros(lista->l_devolucion, lista->cant_devolución, lista->l_prestamos, lista->cant_prestamo, lista->l_usuarios, lista->cant_usuarios, lista->l_libros, lista->cant_libros);
+            break;
+
+        case 6:
             break;
 
         default:
             cout << "Opción invalida, ingrese otra opción\n";
             break;
         }
-    }while(select !=5 );
+    }while(select !=6 );
 }
 
 void visualizar_datos(lista_m* &lista){
@@ -162,7 +170,7 @@ void visualizar_datos(lista_m* &lista){
         break;
 
     case 4:
-        /* code */
+        imprimir_devoluciones(lista->l_devolucion, lista->cant_devolución);
         break;
 
     case 5:
@@ -188,6 +196,7 @@ void agregar_libros(libro* &l_libros, int &tam){
             if(strcmp((l_libros+i)->id,aux->id) == 0){
                 cout << "Se ha encontrado un libro existente con un Id igual al ingresado," 
                 << "intente denuevo con otro Id o elimine el libro existente con ese Id\n";
+                system("pause");
                 return;
             }
         }
@@ -208,7 +217,7 @@ void agregar_libros(libro* &l_libros, int &tam){
         } else {
 
             for (int i = 0; i < tam; i++){
-                if(strcmp((l_libros+i)->titulo,aux->titulo) == 0){
+                if(strcasecmp((l_libros+i)->titulo,aux->titulo) == 0){
                     int respuesta = 0;
                     cout << "\nSe ha encontrado un libro con el mismo titulo, Seleccione una opción:\n\n";
                     cout << "1. Desea aumentar la cantidad de copias de: \n";
@@ -216,7 +225,7 @@ void agregar_libros(libro* &l_libros, int &tam){
                     cout << "2. Ingresar el libro cómo una nueva edición/otro libro\n";
                     cin >> respuesta;
                     if(respuesta == 1){
-                        (l_libros+tam)->cant_copias += aux->cant_copias;
+                        (l_libros+i)->cant_copias += aux->cant_copias;
                         cout << "¡Se han añadido exitosamente las copias del libro!\n";
                         system("pause");
                         return;
@@ -271,7 +280,7 @@ void agregar_usuarios(usuario* &l_usuarios, int &tam){
             cout << "Se ha detectado que el usuario es mayor de edad\n"
             << "Ingrese el tipo cedula del usuario 'C' para cédula de ciudadania, 'E' para cédula de extranjeria\n";
             cin.get(aux->t_id);
-        } else if (strcmp(aux->p_nacimiento, "Colombia") == 0 || strcmp(aux->p_nacimiento, "colombia") == 0)  {
+        } else if (strcasecmp(aux->p_nacimiento, "Colombia") == 0 || strcasecmp(aux->p_nacimiento, "colombia") == 0)  {
             cout << "Se ha detectado que el usuario es menor de edad y ciudadano Colombiano,"
                  << " se le ha asignado automaticamente I para tarjeta de identidad\n";
         } else {
@@ -290,9 +299,8 @@ void agregar_usuarios(usuario* &l_usuarios, int &tam){
             l_usuarios = aux;
             tam++;
         } else {
-
             for (int i = 0; i < tam; i++){
-                if(strcmp((l_usuarios+i)->id,aux->id) == 0){
+                if(strcasecmp((l_usuarios+i)->id,aux->id) == 0){
                     cout << "Se ha encontrado un usuario con el mismo número de Id que el actual\n"
                     << "Comuniquese con servicio al cliente si cree que esto es un error\n"
                     << "Saliendo del modulo de registro\n";
@@ -368,7 +376,7 @@ int calcular_tiempo(char* fecha, char select){
     tm_fecha->tm_mday = stoi(token);
     token = strtok(NULL, "/");
     
-    unsigned tiempo = difftime(ahora, mktime(tm_fecha));
+    double tiempo = difftime(ahora, mktime(tm_fecha));
 
     delete[] aux;
 
@@ -466,7 +474,7 @@ void realizar_prestamo(prestamo* &l_prestamos, int &tam_prestamos, libro* &l_lib
         for(int i = 0; i < tam_prestamos; i++){
             *(copia+i) = *(l_prestamos+i);
         }
-        delete[] l_usuarios;
+        delete[] l_prestamos;
         l_prestamos = copia;
         tam_prestamos++;
 
@@ -484,13 +492,13 @@ void realizar_prestamo(prestamo* &l_prestamos, int &tam_prestamos, libro* &l_lib
 
 void imprimir_prestamo(prestamo* &l_prestamo, int &tam){
     fflush(stdin);
-    cout<< setfill(' ') << left << setw(6) << "Prestamo #" << setw(18) << "Usuario #" 
-        << setw(8) << "Libro #" << setw(12) << "Fecha del Prestamo" << endl;
+    cout<< setfill(' ') << left << setw(12) << "Prestamo #" << setw(18) << "Usuario #" 
+        << setw(10) << "Libro #" << setw(12) << "Fecha del Prestamo" << endl;
 
     if (tam != 0 && l_prestamo != nullptr) {
         for(int i = 0; i < tam; i++){
-        cout<< setfill(' ') << left << setw(6) << (l_prestamo+i)->id_prestamo << setw(18) << (l_prestamo+i)->id_usuario 
-        << setw(8) << (l_prestamo+i)->id_libro << setw(12) << (l_prestamo+i)->f_prestamo << endl;
+        cout<< setfill(' ') << left << setw(12) << (l_prestamo+i)->id_prestamo << setw(18) << (l_prestamo+i)->id_usuario 
+        << setw(10) << (l_prestamo+i)->id_libro << setw(12) << (l_prestamo+i)->f_prestamo << endl;
         } 
     } else {
         cout << "No hay prestamos registrados\n";
@@ -499,3 +507,155 @@ cout<<endl;
 system("pause");
 }
 
+void devolver_libros(devolucion* &l_devolucion, int &tam_devolucion, prestamo* &l_prestamos, int &tam_prestamo, usuario* &l_usuarios, int &tam_usuarios, libro* &l_libros, int tam_libros){
+    fflush(stdin);
+    devolucion* aux = new devolucion();
+    bool existe = false;
+
+    if(tam_prestamo == 0){
+        cout << "No existen prestamos a devolver\n";
+        system("pause");
+        return;
+    }
+    system("cls");
+
+    cout << "Ingrese el Id del prestamo a devolver\n";
+    cin.ignore();
+    cin.getline(aux->id_prestamo, 4);
+
+        for (int i = 0; i < tam_prestamo; i++){
+            if(strcmp((l_prestamos+i)->id_prestamo,aux->id_prestamo) == 0){
+                existe = true;
+            }
+        }
+
+        if(!existe){
+            cout << "No se ha encontrado un prestamo con ese Id, porfavor verifique y vuelva a intentarlo\n";
+            system("pause");
+            delete aux;
+            return;
+        }
+
+    cout << "Ingrese un Id para esta devolución\n";
+    cin.getline(aux->id_prestamo, 4);
+
+    char* aux2 = dar_fecha_actual();
+
+    cout << "Se tiene en cuenta que se devuelve el libro el día de hoy, por lo que la fecha de devolución sería:"
+         << aux2 << endl;
+
+    strcpy(aux->f_devolucion, aux2);
+
+    delete[] aux2;
+
+    usuario* pTemp;
+    prestamo* pTemp2;
+
+    for (int i = 0; i < tam_prestamo; i++){
+        if(strcasecmp((l_prestamos+i)->id_prestamo,aux->id_prestamo) == 0){
+            pTemp2 = (l_prestamos+i);
+        }
+    }
+
+    for (int i = 0; i < tam_usuarios; i++){
+        if(strcasecmp((l_usuarios+i)->id,pTemp2->id_usuario) == 0){
+            pTemp = (l_usuarios+i);
+        }
+    } 
+    
+    if(calcular_tiempo(pTemp->f_nacimiento, 'a') < 18){
+        if(calcular_tiempo(pTemp2->f_devolucion,'d') <= 0){
+            cout << "El usuario no debe pagar nada\n";
+            aux->pago_pend = 0;
+
+        } else {
+            cout << "¡La devolución debió ser hace " << (calcular_tiempo(pTemp2->f_devolucion,'d')) << "días!\n";
+            cout << "El usuario debe pagar:" << 2500*floor(calcular_tiempo(pTemp2->f_devolucion,'d'));
+            aux->pago_pend = 2500*floor(calcular_tiempo(pTemp2->f_devolucion,'d'));
+        }
+    }
+
+    if(calcular_tiempo(pTemp->f_nacimiento, 'a') > 50){
+        if(calcular_tiempo(pTemp2->f_devolucion,'d') <= 0){
+            cout << "El usuario no debe pagar nada\n";
+            aux->pago_pend = 0;
+        } else {
+            cout << "¡La devolución debió ser hace " << (calcular_tiempo(pTemp2->f_devolucion,'d')) << "días!\n";
+            cout << "El usuario debe pagar:" << 5000*floor(calcular_tiempo(pTemp2->f_devolucion,'d'));
+            aux->pago_pend = 5000*floor(calcular_tiempo(pTemp2->f_devolucion,'d'));
+        }
+    }
+
+    if(calcular_tiempo(pTemp->f_nacimiento, 'a') > 17 && 50 > calcular_tiempo(pTemp->f_nacimiento, 'a')){
+        if(calcular_tiempo(pTemp2->f_devolucion,'d') <= 0){
+            cout << "El usuario no debe pagar nada\n";
+            aux->pago_pend = 0;
+
+        } else {
+            cout << "¡La devolución debió ser hace " << (calcular_tiempo(pTemp2->f_devolucion,'d')) << "días!\n";
+            cout << "El usuario debe pagar:" << 15000*floor(calcular_tiempo(pTemp2->f_devolucion,'d'));
+            aux->pago_pend = 15000*floor(calcular_tiempo(pTemp2->f_devolucion,'d'));
+        }
+    }
+
+    system("pause");
+
+    for (int i = 0; i < tam_libros; i++){
+        if(strcasecmp((l_libros+i)->id,pTemp2->id_libro) == 0){
+            (l_libros+i)->cant_copias++;
+        }
+    } 
+
+    if(tam_devolucion == 0){
+            l_devolucion = aux;
+            tam_devolucion++;
+    } else {
+        devolucion* copia = new devolucion[tam_devolucion+1];
+        *(copia+tam_devolucion) = *aux;
+        for(int i = 0; i < tam_devolucion; i++){
+            *(copia+i) = *(l_devolucion+i);
+        }
+        delete[] l_devolucion;
+        l_devolucion = copia;
+        tam_devolucion++;
+        cout << "Devolución exitosa!\n";
+    }
+}
+
+char* dar_fecha_actual(){
+    char* fecha = new char[11];
+    *(fecha)= '\0';
+    
+    time_t t = time(NULL);
+    tm* hoy = localtime(&t);
+
+    string aux = to_string(hoy->tm_year + 1900);
+    strcpy(fecha, aux.c_str());
+    aux = to_string(hoy->tm_mon+1);
+    strcat(fecha, "/");
+    if(hoy->tm_mon+1 < 10){strcat(fecha, "0");};
+    strcat(fecha, aux.c_str());
+    if(hoy->tm_mday < 10){strcat(fecha, "0");};
+    aux = to_string(hoy->tm_mday);
+    strcat(fecha, "/");
+    strcat(fecha, aux.c_str());
+    strcat(fecha, "\0");
+
+    return fecha;
+}
+
+void imprimir_devoluciones(devolucion* &l_devoluciones, int &tam){
+    fflush(stdin);
+    cout << setfill(' ') << left << setw(20) << "Id devolución" << setw(20) << "Fecha devolución" << "Pago/Saldo\n";
+
+        if (tam != 0 && l_devoluciones != nullptr) {
+            for(int i = 0; i < tam; i++){
+            cout<< setfill(' ') << left << setw(20) << (l_devoluciones+i)->id_devolucion << setw(20) << (l_devoluciones+i)->f_devolucion
+            << (l_devoluciones+i)->pago_pend << endl;
+            } 
+        } else {
+            cout << "No hay devoluciones registradas\n";
+        }
+    cout<<endl;
+    system("pause");
+}

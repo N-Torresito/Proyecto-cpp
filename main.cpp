@@ -10,10 +10,10 @@ fstream* archivo;
 
 int main ()
 {
+    lista_m* general = new lista_m();
 
-lista_m* general = new lista_m;
-
-menu(general, archivo);
+    menu(general, archivo);
     
+    delete[] general;
     return 0;
 }
