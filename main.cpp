@@ -6,7 +6,7 @@
 #include "adj.h"
 
 using namespace std;
-fstream* archivo;
+fstream archivo;
 
 int main ()
 {

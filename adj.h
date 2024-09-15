@@ -69,13 +69,13 @@ struct lista_m{
     int cant_libros = 0;
     int cant_usuarios = 0;
     int cant_prestamo = 0;
-    int cant_devolución = 0;
+    int cant_devolucion = 0;
 };
 
-void menu(lista_m* &lista, fstream*& in);
+void menu(lista_m* &lista, fstream &in);
 void visualizar_datos(lista_m* &lista);
-void cargar_datos(lista_m* &lista, fstream* &in);
-void guardar_datos(lista_m* &lista, fstream* &out);
+void cargar_datos(lista_m* &lista, fstream &in);
+void guardar_datos(lista_m* &lista, fstream &out);
 void agregar_libros(libro* &l_libros, int &tam);
 void imprimir_libros(libro* &l_libros, int tam);
 int calcular_tiempo(char* fecha, char select);
@@ -87,7 +87,7 @@ char* dar_fecha_actual();
 void devolver_libros(devolucion* &l_devolucion, int &tam_devolucion, prestamo* &l_prestamos, int &tam_prestamo, usuario* &l_usuarios, int &tam_usuarios, libro* &l_libros, int tam);
 void imprimir_devoluciones(devolucion* &l_devoluciones, int &tam);
 
-void menu(lista_m* &lista, fstream*& in){
+void menu(lista_m* &lista, fstream &in){
     fflush(stdin);
     int select = 5;
     do{
@@ -102,7 +102,9 @@ void menu(lista_m* &lista, fstream*& in){
         cout << "3. Registrar Usuarios\n";
         cout << "4. Registrar Prestamo\n";
         cout << "5. Registrar Devoluciones\n";
-        cout << "6. Salir\n\n";
+        cout << "6. Guardar datos\n";
+        cout << "7. Cargar datos\n";
+        cout << "8. Salir\n\n";
 
         cout << "Selección: ";
         cin >> select;
@@ -127,17 +129,25 @@ void menu(lista_m* &lista, fstream*& in){
             break;
 
         case 5:
-            devolver_libros(lista->l_devolucion, lista->cant_devolución, lista->l_prestamos, lista->cant_prestamo, lista->l_usuarios, lista->cant_usuarios, lista->l_libros, lista->cant_libros);
+            devolver_libros(lista->l_devolucion, lista->cant_devolucion, lista->l_prestamos, lista->cant_prestamo, lista->l_usuarios, lista->cant_usuarios, lista->l_libros, lista->cant_libros);
             break;
 
         case 6:
+            guardar_datos(lista, in);
+            break;
+
+        case 7:
+            cargar_datos(lista, in);
+            break;
+
+        case 8:
             break;
 
         default:
             cout << "Opción invalida, ingrese otra opción\n";
             break;
         }
-    }while(select !=6 );
+    }while(select !=8 );
 }
 
 void visualizar_datos(lista_m* &lista){
@@ -170,7 +180,7 @@ void visualizar_datos(lista_m* &lista){
         break;
 
     case 4:
-        imprimir_devoluciones(lista->l_devolucion, lista->cant_devolución);
+        imprimir_devoluciones(lista->l_devolucion, lista->cant_devolucion);
         break;
 
     case 5:
@@ -304,6 +314,8 @@ void agregar_usuarios(usuario* &l_usuarios, int &tam){
                     cout << "Se ha encontrado un usuario con el mismo número de Id que el actual\n"
                     << "Comuniquese con servicio al cliente si cree que esto es un error\n"
                     << "Saliendo del modulo de registro\n";
+                    
+                    delete aux;
                     system("pause");
                     return;
                 }
@@ -327,19 +339,100 @@ void agregar_usuarios(usuario* &l_usuarios, int &tam){
     }while(select != 'n');
 }
 
-void cargar_datos(lista_m* &lista, fstream*& in){
-    in->open("biblioteca.dat", ios::in);    
-    if (!in->fail())
-    {
+void cargar_datos(lista_m* &lista, fstream &in){
+   
+    in.open("biblioteca.dat", ios::in|ios::binary);
 
+    if(!in.fail()){
+        in.read((char*) &lista->cant_libros, sizeof(int));
+        in.read((char*) &lista->cant_usuarios, sizeof(int));
+        in.read((char*) &lista->cant_prestamo, sizeof(int));
+        in.read((char*) &lista->cant_devolucion, sizeof(int));
+
+        if(lista->cant_libros != 0){
+            lista->l_libros = new libro[lista->cant_libros+1];
+            for(int i = 0; i < lista->cant_libros; i++){
+            in.read((char*) &*(lista->l_libros+i), sizeof(libro));
+            }
+        }
+
+        if(lista->cant_usuarios != 0){
+            lista->l_usuarios = new usuario[lista->cant_usuarios+1];
+            for(int i = 0; i < lista->cant_usuarios; i++){
+            in.read((char*) &*(lista->l_usuarios+i), sizeof(usuario));
+            }
+        }
+
+        if(lista->l_prestamos != 0){
+            lista->l_prestamos = new prestamo[lista->cant_prestamo+1];
+            for(int i = 0; i < lista->cant_prestamo; i++){
+            in.read((char*) &*(lista->l_prestamos+i), sizeof(prestamo));
+            }
+        }
+
+        if(lista->cant_devolucion != 0){
+            lista->l_devolucion = new devolucion[lista->cant_devolucion+1];
+            for(int i = 0; i < lista->cant_devolucion; i++){
+            in.read((char*) &*(lista->l_devolucion+i), sizeof(devolucion));
+            }
+        }
+
+        in.close();
+        cout << "¡Se han cargado los datos correctamente!\n";
+        system("pause");
+        return;
+    }
+    in.close();
+    cout << "Ha ocurrido un error al cargar los datos\n"; 
+    cout << "Puede ser que no exista un archivo con los datos correspondientes o este corrupto\n";
+    system("pause");
+    return;
 }
 
+void guardar_datos(lista_m* &lista, fstream &out){
+    out.open("biblioteca.dat", ios::out|ios::binary);   
 
+    if (!out.fail()){
 
-}
+        out.write((char*) &lista->cant_libros, sizeof(int));
+        out.write((char*) &lista->cant_usuarios, sizeof(int));
+        out.write((char*) &lista->cant_prestamo, sizeof(int));
+        out.write((char*) &lista->cant_devolucion, sizeof(int));
 
-void guardar_datos(lista_m* &lista, fstream* &out){
+        if (lista->cant_libros != 0){
+            for(int i = 0; i < lista->cant_libros; i++){
+            out.write((char*) &*(lista->l_libros+i), sizeof(libro));
+            }
+        }
 
+        if(lista->cant_usuarios != 0){
+            for(int i = 0; i < lista->cant_usuarios; i++){
+            out.write((char*) &*(lista->l_usuarios+i), sizeof(usuario));
+            }
+        }
+
+        if (lista->cant_prestamo != 0){
+            for(int i = 0; i < lista->cant_prestamo; i++){
+            out.write((char*) &*(lista->l_prestamos+i), sizeof(prestamo));
+            }
+        }
+
+        if(lista->cant_devolucion != 0){
+            for(int i = 0; i < lista->cant_devolucion; i++){
+            out.write((char*) &*(lista->l_devolucion+i), sizeof(devolucion));
+            }
+        }
+
+        out.close();
+    
+        cout << "¡Datos guardados exitosamente!\n";
+        system("pause");  
+        return;  
+    }  
+    out.close();
+    cout << "Ha ocurrido un error al guardar los datos\n"; 
+    system("pause");
+    return;
 }
 
 void imprimir_libros(libro* &l_libros, int tam){
@@ -408,7 +501,6 @@ void imprimir_usuarios(usuario* &l_usuarios, int tam){
 }
 
 void realizar_prestamo(prestamo* &l_prestamos, int &tam_prestamos, libro* &l_libros, int &tam_libros, usuario* &l_usuarios, int &tam_usuarios){
-    fflush(stdin);
     system("cls");
     prestamo* aux = new prestamo();
     bool existe = false;
@@ -417,23 +509,9 @@ void realizar_prestamo(prestamo* &l_prestamos, int &tam_prestamos, libro* &l_lib
     cin.ignore();
     cin.getline(aux->id_libro, 6);
 
-        for (int i = 0; i < tam_libros; i++){
-            if(strcmp((l_libros+i)->id,aux->id_libro) == 0 && (l_libros+i)->cant_copias!= 0){
-                existe = true;
-                break;
-            }
-        }
+        cout << "Ingrese el Id del usuario\n";
+        cin.getline(aux->id_usuario, 16);
 
-        if(!existe){
-            cout << "No se ha encontrado un libro con el Id ingresado o no tiene copias disponibles, regresando al menu principal\n";
-            system("pause");
-            return;
-        }
-
-    cout << "Ingrese el Id del usuario\n";
-    cin.getline(aux->id_usuario, 16);
-
-        existe = false;
         for (int i = 0; i < tam_usuarios; i++){
             if(strcmp((l_usuarios+i)->id,aux->id_usuario) == 0){
                 existe = true;
@@ -442,6 +520,22 @@ void realizar_prestamo(prestamo* &l_prestamos, int &tam_prestamos, libro* &l_lib
 
         if(!existe){
             cout << "No se ha encontrado al usuario con el Id ingresado, regresando al menu principal\n";
+            system("pause");
+            return;
+        }
+
+        existe = false;
+
+        for (int i = 0; i < tam_libros; i++){
+            if(strcmp((l_libros+i)->id,aux->id_libro) == 0){
+                existe = true;
+                (l_libros+i)->cant_copias = (l_libros+i)->cant_copias - 1;
+                break;
+            }
+        }
+
+        if(!existe){
+            cout << "No se ha encontrado un libro con el Id ingresado o no tiene copias disponibles, regresando al menu principal\n";
             system("pause");
             return;
         }
@@ -465,6 +559,7 @@ void realizar_prestamo(prestamo* &l_prestamos, int &tam_prestamos, libro* &l_lib
             if(strcmp((l_prestamos+i)->id_prestamo,aux->id_prestamo) == 0){
                 cout << "Se ha encontrado otro prestamo con el mismo Id que el actual, saliendo al menú principal\n";
                 system("pause");
+                delete aux;
                 return;
             }
         }
@@ -474,20 +569,14 @@ void realizar_prestamo(prestamo* &l_prestamos, int &tam_prestamos, libro* &l_lib
         for(int i = 0; i < tam_prestamos; i++){
             *(copia+i) = *(l_prestamos+i);
         }
+
         delete[] l_prestamos;
         l_prestamos = copia;
         tam_prestamos++;
 
-        for (int i = 0; i < tam_libros; i++){
-            if(strcmp((l_libros+i)->id,aux->id_libro) == 0){
-                (l_libros+i)->cant_copias--;
-                break;
-            }
-        }
-
-        cout << "Prestamo realizado exitosamente!\n";
-        system("pause");
     }
+    cout << "Prestamo realizado exitosamente!\n";
+    system("pause");
 }
 
 void imprimir_prestamo(prestamo* &l_prestamo, int &tam){
@@ -539,26 +628,25 @@ void devolver_libros(devolucion* &l_devolucion, int &tam_devolucion, prestamo* &
     cout << "Ingrese un Id para esta devolución\n";
     cin.getline(aux->id_prestamo, 4);
 
-    char* aux2 = dar_fecha_actual();
+    char* fecha_actual = dar_fecha_actual();
 
+    strcpy(aux->f_devolucion, fecha_actual);   
     cout << "Se tiene en cuenta que se devuelve el libro el día de hoy, por lo que la fecha de devolución sería:"
-         << aux2 << endl;
-
-    strcpy(aux->f_devolucion, aux2);
-
-    delete[] aux2;
+         << fecha_actual << endl;
+    
+    delete[] fecha_actual;
 
     usuario* pTemp;
     prestamo* pTemp2;
 
     for (int i = 0; i < tam_prestamo; i++){
-        if(strcasecmp((l_prestamos+i)->id_prestamo,aux->id_prestamo) == 0){
+        if(strcmp((l_prestamos+i)->id_prestamo,aux->id_prestamo) == 0){
             pTemp2 = (l_prestamos+i);
         }
     }
 
     for (int i = 0; i < tam_usuarios; i++){
-        if(strcasecmp((l_usuarios+i)->id,pTemp2->id_usuario) == 0){
+        if(strcmp((l_usuarios+i)->id,pTemp2->id_usuario) == 0){
             pTemp = (l_usuarios+i);
         }
     } 
@@ -601,7 +689,7 @@ void devolver_libros(devolucion* &l_devolucion, int &tam_devolucion, prestamo* &
     system("pause");
 
     for (int i = 0; i < tam_libros; i++){
-        if(strcasecmp((l_libros+i)->id,pTemp2->id_libro) == 0){
+        if(strcmp((l_libros+i)->id,pTemp2->id_libro) == 0){
             (l_libros+i)->cant_copias++;
         }
     } 
