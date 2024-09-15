@@ -3,7 +3,7 @@
 #include <iostream>
 #include <cstring>
 #include <time.h>
-#include <math.h>
+#include <cmath>
 using namespace std;
 
 /*
@@ -154,7 +154,6 @@ void menu(lista_m* &lista, fstream &in){
 }
 
 void visualizar_datos(lista_m* &lista){
-    fflush(stdin);
     system("cls");
     int select;
     cout << "Ingrese que datos desea visualizar\n";
@@ -196,7 +195,6 @@ void visualizar_datos(lista_m* &lista){
 }
 
 void agregar_libros(libro* &l_libros, int &tam){
-    fflush(stdin);
     char select = 'n';
     do{
         system("cls");
@@ -266,7 +264,6 @@ void agregar_libros(libro* &l_libros, int &tam){
 }
 
 void agregar_usuarios(usuario* &l_usuarios, int &tam){
-    fflush(stdin);
     char select = 'n';
     do{
         system("cls");
@@ -673,7 +670,7 @@ int seleccion = 4;
         for (int i = 0; i < tam_titulos ; i++) {
             for (int j = 0; j < tam_titulos; j++) {
             
-                if (strcmp((lista+j)->titulo, (lista+i)->titulo) > 0) {                
+                if (strcmp((lista+j)->titulo, (lista+i)->titulo) < 0) {                
                     aux = *(lista+i); 
                     *(lista+i) = *(lista+j); 
                     *(lista+i) = aux; 
@@ -727,6 +724,7 @@ int seleccion = 4;
         break;
 
      case 3:
+        cout << '\n';
         cout << setfill(' ') << left << setw(7) << "ID" << setw(32) << "Titulo"
              << setw(25) << "Autor" << setw(7) << "Año"
             << setw(20) << "Copias disponibles" << endl;
@@ -752,7 +750,7 @@ int seleccion = 4;
 }
 
 void imprimir_libros_disponibles(libro* &l_libros, int tam){
-    fflush(stdin);
+    system("cls");
     cout << setfill(' ') << left << setw(7) << "ID" << setw(32) << "Titulo"
     << setw(25) << "Autor" << setw(7) << "Año"
      << setw(20) << "Copias disponibles" << endl;
@@ -772,7 +770,7 @@ void imprimir_libros_disponibles(libro* &l_libros, int tam){
 }
 
 void imprimir_libros(libro* &l_libros, int tam){
-    fflush(stdin);
+    system("cls");
     cout << setfill(' ') << left << setw(7) << "ID" << setw(32) << "Titulo"
     << setw(25) << "Autor" << setw(7) << "Año"
      << setw(20) << "Copias disponibles" << endl;
@@ -792,8 +790,6 @@ void imprimir_libros(libro* &l_libros, int tam){
 int calcular_tiempo(char* fecha, char select){
 //Will use 'select' variable to interchange between days and years 
 //Se usa 'select' para cambiar entre dias y años en el valor de retorno
-    fflush(stdin);
-    //char* aux = new char[11];
     char aux[11];
     strcpy(aux, fecha);
     time_t ahora = time(NULL);
@@ -808,8 +804,6 @@ int calcular_tiempo(char* fecha, char select){
     
     double tiempo = difftime(ahora, mktime(tm_fecha));
 
-    //delete[] aux;
-
     tiempo /= 60;
     tiempo /= 60;
     tiempo /= 24;
@@ -822,7 +816,6 @@ int calcular_tiempo(char* fecha, char select){
 }
 
 void imprimir_usuarios(usuario* &l_usuarios, int tam){
-    fflush(stdin);
     cout << setfill(' ') << left << setw(26) << "Nombre" << setw(13) << "Telefono" << "Id\n";
 
         if (tam != 0 && l_usuarios != nullptr) {
@@ -917,14 +910,13 @@ void realizar_prestamo(prestamo* &l_prestamos, int &tam_prestamos, libro* &l_lib
 }
 
 void imprimir_prestamo(prestamo* &l_prestamo, int &tam){
-    fflush(stdin);
     cout<< setfill(' ') << left << setw(12) << "Prestamo #" << setw(18) << "Usuario #" 
-        << setw(10) << "Libro #" << setw(12) << "Fecha del Prestamo" << endl;
+        << setw(10) << "Libro #" << setw(20) << "Fecha del Prestamo" << "Fecha de devolución" <<  endl;
 
     if (tam != 0 && l_prestamo != nullptr) {
         for(int i = 0; i < tam; i++){
         cout<< setfill(' ') << left << setw(12) << (l_prestamo+i)->id_prestamo << setw(18) << (l_prestamo+i)->id_usuario 
-        << setw(10) << (l_prestamo+i)->id_libro << setw(12) << (l_prestamo+i)->f_prestamo << endl;
+        << setw(10) << (l_prestamo+i)->id_libro << setw(20) << (l_prestamo+i)->f_prestamo << (l_prestamo+i)->f_devolucion << endl;
         } 
     } else {
         cout << "No hay prestamos registrados\n";
@@ -934,9 +926,10 @@ system("pause");
 }
 
 void devolver_libros(devolucion* &l_devolucion, int &tam_devolucion, prestamo* &l_prestamos, int &tam_prestamo, usuario* &l_usuarios, int &tam_usuarios, libro* &l_libros, int tam_libros){
-    fflush(stdin);
     devolucion* aux = new devolucion();
     bool existe = false;
+    usuario pTemp;
+    prestamo pTemp2;
 
     if(tam_prestamo == 0){
         cout << "No existen prestamos a devolver\n";
@@ -945,6 +938,7 @@ void devolver_libros(devolucion* &l_devolucion, int &tam_devolucion, prestamo* &
     }
     system("cls");
 
+
     cout << "Ingrese el Id del prestamo a devolver\n";
     cin.ignore();
     cin.getline(aux->id_prestamo, 4);
@@ -952,6 +946,7 @@ void devolver_libros(devolucion* &l_devolucion, int &tam_devolucion, prestamo* &
         for (int i = 0; i < tam_prestamo; i++){
             if(strcmp((l_prestamos+i)->id_prestamo,aux->id_prestamo) == 0){
                 existe = true;
+                pTemp2 = *(l_prestamos+i);
             }
         }
 
@@ -963,7 +958,7 @@ void devolver_libros(devolucion* &l_devolucion, int &tam_devolucion, prestamo* &
         }
 
     cout << "Ingrese un Id para esta devolución\n";
-    cin.getline(aux->id_prestamo, 4);
+    cin.getline(aux->id_devolucion, 4);
 
    char* fecha_actual = dar_fecha_actual();
 
@@ -973,14 +968,6 @@ void devolver_libros(devolucion* &l_devolucion, int &tam_devolucion, prestamo* &
     
     delete[] fecha_actual;
 
-    usuario pTemp;
-    prestamo pTemp2;
-
-    for (int i = 0; i < tam_prestamo; i++){
-        if(strcmp((l_prestamos+i)->id_prestamo,aux->id_prestamo) == 0){
-            pTemp2 = *(l_prestamos+i);
-        }
-    }
 
     for (int i = 0; i < tam_usuarios; i++){
         if(strcmp((l_usuarios+i)->id,pTemp2.id_usuario) == 0){
@@ -988,16 +975,17 @@ void devolver_libros(devolucion* &l_devolucion, int &tam_devolucion, prestamo* &
         }
     } 
     
-    cout << "Días pasados" << calcular_tiempo(pTemp2.f_devolucion, 'a') << '\n';
+    cout << "Días pasados" << floor(calcular_tiempo(pTemp2.f_devolucion,'d')) << '\n';
 
     if(calcular_tiempo(pTemp.f_nacimiento, 'a') < 18){
-        if(calcular_tiempo(pTemp2.f_devolucion,'d') < 0){
+        if(calcular_tiempo(pTemp2.f_devolucion,'q') <= 0){
             cout << "El usuario no debe pagar nada\n";
             aux->pago_pend = 0;
 
         } else {
-            cout << "¡La devolución debió ser hace " << (calcular_tiempo(pTemp2.f_devolucion,'d')) << "días!\n";
-            cout << "El usuario debe pagar:" << 2500*floor(calcular_tiempo(pTemp2.f_devolucion,'d'));
+            cout << "¡La devolución debió ser hace " << floor(calcular_tiempo(pTemp2.f_devolucion,'d')) << "días!\n";
+            cout << "La tasa de demora diaría es de $2500 (Tasa adultos)\n\n";
+            cout << "El usuario debe pagar: $" << 2500*floor(calcular_tiempo(pTemp2.f_devolucion,'d')) << "\n\n";
             aux->pago_pend = 2500*floor(calcular_tiempo(pTemp2.f_devolucion,'d'));
         }
     }
@@ -1007,8 +995,9 @@ void devolver_libros(devolucion* &l_devolucion, int &tam_devolucion, prestamo* &
             cout << "El usuario no debe pagar nada\n";
             aux->pago_pend = 0;
         } else {
-            cout << "¡La devolución debió ser hace " << (calcular_tiempo(pTemp2.f_devolucion,'d')) << "días!\n";
-            cout << "El usuario debe pagar:" << 5000*floor(calcular_tiempo(pTemp2.f_devolucion,'d'));
+            cout << "¡La devolución debió ser hace " << floor(calcular_tiempo(pTemp2.f_devolucion,'d')) << "días!\n";
+            cout << "La tasa de demora diaría es de $5000 (Tasa adultos mayores de 50)\n\n";
+            cout << "El usuario debe pagar: $" << 5000*floor(calcular_tiempo(pTemp2.f_devolucion,'d')) << "\n\n";
             aux->pago_pend = 5000*floor(calcular_tiempo(pTemp2.f_devolucion,'d'));
         }
     }
@@ -1019,8 +1008,9 @@ void devolver_libros(devolucion* &l_devolucion, int &tam_devolucion, prestamo* &
             aux->pago_pend = 0;
 
         } else {
-            cout << "¡La devolución debió ser hace " << (calcular_tiempo(pTemp2.f_devolucion,'d')) << "días!\n";
-            cout << "El usuario debe pagar:" << 15000*floor(calcular_tiempo(pTemp2.f_devolucion,'d'));
+            cout << "¡La devolución debió ser hace " << floor(calcular_tiempo(pTemp2.f_devolucion,'d')) << "días!\n";
+            cout << "La tasa de demora diaría es de $15000 (Tasa adultos)\n\n";
+            cout << "El usuario debe pagar: $" << 15000*floor(calcular_tiempo(pTemp2.f_devolucion,'d'))<<"\n\n";
             aux->pago_pend = 15000*floor(calcular_tiempo(pTemp2.f_devolucion,'d'));
         }
     }
@@ -1072,7 +1062,6 @@ char* dar_fecha_actual(){
 }
 
 void imprimir_devoluciones(devolucion* &l_devoluciones, int &tam){
-    fflush(stdin);
     cout << setfill(' ') << left << setw(20) << "Id devolución" << setw(20) << "Fecha devolución" << "Pago/Saldo\n";
         if (tam != 0 && l_devoluciones != nullptr) {
             for(int i = 0; i < tam; i++){
