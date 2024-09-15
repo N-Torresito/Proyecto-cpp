@@ -77,6 +77,9 @@ void visualizar_datos(lista_m* &lista);
 void cargar_datos(lista_m* &lista, fstream &in);
 void guardar_datos(lista_m* &lista, fstream &out);
 void agregar_libros(libro* &l_libros, int &tam);
+void visualizar_libros(libro* &l_libros, int tam);
+void imprimir_libros_disponibles(libro* &l_libros, int tam);
+void imprimir_libros_busqueda(libro* &l_libros, int tam);
 void imprimir_libros(libro* &l_libros, int tam);
 int calcular_tiempo(char* fecha, char select);
 void imprimir_usuarios(usuario* &l_usuarios, int tam);
@@ -93,7 +96,7 @@ void menu(lista_m* &lista, fstream &in){
     do{
         system("cls");
         cout << setw(50)<< setfill('*') <<"*" << '\n';
-        cout << setw(35) << setfill(' ') << right << "Gestion de Biblioteca V0.2" << '\n';
+        cout << setw(35) << setfill(' ') << right << "Gestion de Biblioteca V0.5" << '\n';
         cout << setw(50)<< setfill('*') <<"*" << "\n\n";
         cout << "Bienvenido/a, elija alguna opción\n\n";
 
@@ -168,7 +171,7 @@ void visualizar_datos(lista_m* &lista){
     switch (select)
     {
     case 1:
-        imprimir_libros(lista->l_libros, lista->cant_libros);
+        visualizar_libros(lista->l_libros, lista->cant_libros);
         break;
 
     case 2:
@@ -570,6 +573,204 @@ void guardar_datos(lista_m* &lista, fstream &out){
     return;
 }
 
+void visualizar_libros(libro* &l_libros, int tam){
+    int select = 4;
+    cout << "Ingrese cómo quiere ver/buscar los libros\n";
+    cout << "1. Todos los libros\n";
+    cout << "2. Libros disponibles\n";
+    cout << "3. Autor/Id/Titulo\n";
+    cout << "4. Salir\n";
+
+    cin >> select;
+
+    switch (select)
+    {
+    case 1:
+        imprimir_libros(l_libros, tam);
+        break;
+
+    case 2:
+        imprimir_libros_disponibles(l_libros, tam);
+        break;
+
+    case 3:
+        imprimir_libros_busqueda(l_libros, tam);
+        break;
+
+    case 4:
+        return;
+        break;
+    
+    default:
+        return;
+        break;
+    }
+}
+
+void imprimir_libros_busqueda(libro* &l_libros, int tam){
+system("cls");
+int seleccion = 4;
+
+    cout << "Ingrese que tipo de busqueda desea realizar\n";
+    cout << "1. Por titulo\n";
+    cout << "2. Por autor\n";
+    cout << "3. Por Id\n";
+    cin >> seleccion;
+
+    char titulo_aux[31];
+    char autor_aux[26];
+    char id_aux[6];
+    switch (seleccion)
+    {
+    case 1:
+        cout << "Ingrese el titulo del libro a buscar\n";
+        cin.ignore();
+        cin.getline(titulo_aux, 31);
+        break;
+     case 2:
+        cout << "Ingrese el autor del libro a buscar\n";
+        cin.ignore();
+        cin.getline(autor_aux, 26);
+        break;
+
+     case 3:
+        cout << "Ingrese el Id del libro a buscar\n";
+        cin.ignore();
+        cin.getline(id_aux, 6);
+        break;
+
+     case 4:
+        return;
+        break;
+
+    default:
+        cout << "No es una opción valida\n";
+        system("pause");
+        return;
+        break;
+    }
+
+    libro* lista = nullptr;
+    int tam_titulos = 0; 
+    if(seleccion == 1){
+        for(int i = 0; i < tam; i++){
+            if(strstr((l_libros+i)->titulo,titulo_aux) != nullptr){
+                tam_titulos++;
+            }
+        }
+
+        lista = new libro[tam_titulos];
+        libro aux;
+
+        for(int i = 0, j = 0; i < tam; i++){
+            
+            if(strstr((l_libros+i)->titulo,titulo_aux) != nullptr){
+                *(lista+j) = *(l_libros+i);
+                j++;
+            }
+        }
+
+        for (int i = 0; i < tam_titulos ; i++) {
+            for (int j = 0; j < tam_titulos; j++) {
+            
+                if (strcmp((lista+j)->titulo, (lista+i)->titulo) > 0) {                
+                    aux = *(lista+i); 
+                    *(lista+i) = *(lista+j); 
+                    *(lista+i) = aux; 
+                }
+            }
+        }
+
+    }
+
+    bool existe = false;
+    switch (seleccion)
+    {
+    case 1:
+        cout << setfill(' ') << left << setw(7) << "ID" << setw(32) << "Titulo"
+        << setw(25) << "Autor" << setw(7) << "Año"
+        << setw(20) << "Copias disponibles" << endl;
+            if (tam_titulos != 0 && lista != nullptr) {
+                for(int i = 0; i < tam_titulos; i++){
+                    
+                    cout<< setfill(' ') << setw(7) << (lista+i)->id << setw(32) << (lista+i)->titulo 
+                        << setw(25) << (lista+i)->autor << setw(7) << (lista+i)->año_pub <<
+                        setw(20) << (lista+i)->cant_copias <<'\n';
+                }
+            } else {
+                cout << "No hay libros con ese titulo ni contienen ese titulo\n";
+            }
+        cout<<endl;
+        delete[] lista;
+        system("pause");
+        break;
+    
+     case 2:
+        cout << setfill(' ') << left << setw(7) << "ID" << setw(32) << "Titulo"
+             << setw(25) << "Autor" << setw(7) << "Año"
+            << setw(20) << "Copias disponibles" << endl;
+            if (tam != 0 && l_libros != nullptr) {
+                for(int i = 0; i < tam; i++){
+                    if(strstr((l_libros+i)->autor, autor_aux) != nullptr){
+                        cout<< setfill(' ') << setw(7) << (l_libros+i)->id << setw(32) << (l_libros+i)->titulo 
+                        << setw(25) << (l_libros+i)->autor << setw(7) << (l_libros+i)->año_pub <<
+                        setw(20) << (l_libros+i)->cant_copias <<'\n';
+                        existe = true;
+                    }
+                } 
+            }
+            if(!existe){
+                cout << "No se han encontrado libros con ese autor\n";
+            }    
+            cout<<endl;
+            system("pause");
+        break;
+
+     case 3:
+        cout << setfill(' ') << left << setw(7) << "ID" << setw(32) << "Titulo"
+             << setw(25) << "Autor" << setw(7) << "Año"
+            << setw(20) << "Copias disponibles" << endl;
+            existe = false;
+            if (tam != 0 && l_libros != nullptr) {
+                for(int i = 0; i < tam; i++){
+                    if(strcmp((l_libros+i)->id, id_aux) == 0){
+                        cout<< setfill(' ') << setw(7) << (l_libros+i)->id << setw(32) << (l_libros+i)->titulo 
+                        << setw(25) << (l_libros+i)->autor << setw(7) << (l_libros+i)->año_pub <<
+                        setw(20) << (l_libros+i)->cant_copias <<'\n';
+                        existe = true;
+                    }
+                } 
+            }
+            if(!existe){
+                cout << "No se han encontrado libros con ese Id\n";
+            }    
+            cout<<endl;
+            system("pause");
+        break;
+    }
+
+}
+
+void imprimir_libros_disponibles(libro* &l_libros, int tam){
+    fflush(stdin);
+    cout << setfill(' ') << left << setw(7) << "ID" << setw(32) << "Titulo"
+    << setw(25) << "Autor" << setw(7) << "Año"
+     << setw(20) << "Copias disponibles" << endl;
+        if (tam != 0 && l_libros != nullptr) {
+            for(int i = 0; i < tam; i++){
+                if((l_libros+i)->cant_copias > 0){
+                    cout<< setfill(' ') << setw(7) << (l_libros+i)->id << setw(32) << (l_libros+i)->titulo 
+                    << setw(25) << (l_libros+i)->autor << setw(7) << (l_libros+i)->año_pub <<
+                    setw(20) << (l_libros+i)->cant_copias <<'\n';
+                }
+            } 
+        } else {
+            cout << "No hay libros registrados\n";
+        }
+    cout<<endl;
+    system("pause");
+}
+
 void imprimir_libros(libro* &l_libros, int tam){
     fflush(stdin);
     cout << setfill(' ') << left << setw(7) << "ID" << setw(32) << "Titulo"
@@ -592,21 +793,22 @@ int calcular_tiempo(char* fecha, char select){
 //Will use 'select' variable to interchange between days and years 
 //Se usa 'select' para cambiar entre dias y años en el valor de retorno
     fflush(stdin);
-    char* aux = new char[11];
+    //char* aux = new char[11];
+    char aux[11];
     strcpy(aux, fecha);
     time_t ahora = time(NULL);
     tm* tm_fecha = localtime(&ahora);
     char* token = strtok(aux, "/");
-    tm_fecha->tm_year = (stoi(token) - 1900);
+    tm_fecha->tm_year = (atoi(token) - 1900);
     token = strtok(NULL, "/");
-    tm_fecha->tm_mon = (stoi(token) - 1);
+    tm_fecha->tm_mon = (atoi(token) - 1);
     token = strtok(NULL, "/");
-    tm_fecha->tm_mday = stoi(token);
+    tm_fecha->tm_mday = atoi(token);
     token = strtok(NULL, "/");
     
     double tiempo = difftime(ahora, mktime(tm_fecha));
 
-    delete[] aux;
+    //delete[] aux;
 
     tiempo /= 60;
     tiempo /= 60;
@@ -763,7 +965,7 @@ void devolver_libros(devolucion* &l_devolucion, int &tam_devolucion, prestamo* &
     cout << "Ingrese un Id para esta devolución\n";
     cin.getline(aux->id_prestamo, 4);
 
-    char* fecha_actual = dar_fecha_actual();
+   char* fecha_actual = dar_fecha_actual();
 
     strcpy(aux->f_devolucion, fecha_actual);   
     cout << "Se tiene en cuenta que se devuelve el libro el día de hoy, por lo que la fecha de devolución sería:"
@@ -771,60 +973,62 @@ void devolver_libros(devolucion* &l_devolucion, int &tam_devolucion, prestamo* &
     
     delete[] fecha_actual;
 
-    usuario* pTemp;
-    prestamo* pTemp2;
+    usuario pTemp;
+    prestamo pTemp2;
 
     for (int i = 0; i < tam_prestamo; i++){
         if(strcmp((l_prestamos+i)->id_prestamo,aux->id_prestamo) == 0){
-            pTemp2 = (l_prestamos+i);
+            pTemp2 = *(l_prestamos+i);
         }
     }
 
     for (int i = 0; i < tam_usuarios; i++){
-        if(strcmp((l_usuarios+i)->id,pTemp2->id_usuario) == 0){
-            pTemp = (l_usuarios+i);
+        if(strcmp((l_usuarios+i)->id,pTemp2.id_usuario) == 0){
+            pTemp = *(l_usuarios+i);
         }
     } 
     
-    if(calcular_tiempo(pTemp->f_nacimiento, 'a') < 18){
-        if(calcular_tiempo(pTemp2->f_devolucion,'d') <= 0){
+    cout << "Días pasados" << calcular_tiempo(pTemp2.f_devolucion, 'a') << '\n';
+
+    if(calcular_tiempo(pTemp.f_nacimiento, 'a') < 18){
+        if(calcular_tiempo(pTemp2.f_devolucion,'d') < 0){
             cout << "El usuario no debe pagar nada\n";
             aux->pago_pend = 0;
 
         } else {
-            cout << "¡La devolución debió ser hace " << (calcular_tiempo(pTemp2->f_devolucion,'d')) << "días!\n";
-            cout << "El usuario debe pagar:" << 2500*floor(calcular_tiempo(pTemp2->f_devolucion,'d'));
-            aux->pago_pend = 2500*floor(calcular_tiempo(pTemp2->f_devolucion,'d'));
+            cout << "¡La devolución debió ser hace " << (calcular_tiempo(pTemp2.f_devolucion,'d')) << "días!\n";
+            cout << "El usuario debe pagar:" << 2500*floor(calcular_tiempo(pTemp2.f_devolucion,'d'));
+            aux->pago_pend = 2500*floor(calcular_tiempo(pTemp2.f_devolucion,'d'));
         }
     }
 
-    if(calcular_tiempo(pTemp->f_nacimiento, 'a') > 50){
-        if(calcular_tiempo(pTemp2->f_devolucion,'d') <= 0){
+    if(calcular_tiempo(pTemp.f_nacimiento, 'a') > 50){
+        if(calcular_tiempo(pTemp2.f_devolucion,'d') <= 0){
             cout << "El usuario no debe pagar nada\n";
             aux->pago_pend = 0;
         } else {
-            cout << "¡La devolución debió ser hace " << (calcular_tiempo(pTemp2->f_devolucion,'d')) << "días!\n";
-            cout << "El usuario debe pagar:" << 5000*floor(calcular_tiempo(pTemp2->f_devolucion,'d'));
-            aux->pago_pend = 5000*floor(calcular_tiempo(pTemp2->f_devolucion,'d'));
+            cout << "¡La devolución debió ser hace " << (calcular_tiempo(pTemp2.f_devolucion,'d')) << "días!\n";
+            cout << "El usuario debe pagar:" << 5000*floor(calcular_tiempo(pTemp2.f_devolucion,'d'));
+            aux->pago_pend = 5000*floor(calcular_tiempo(pTemp2.f_devolucion,'d'));
         }
     }
 
-    if(calcular_tiempo(pTemp->f_nacimiento, 'a') > 17 && 50 > calcular_tiempo(pTemp->f_nacimiento, 'a')){
-        if(calcular_tiempo(pTemp2->f_devolucion,'d') <= 0){
+    if(calcular_tiempo(pTemp.f_nacimiento, 'a') > 17 && 50 > calcular_tiempo(pTemp.f_nacimiento, 'a')){
+        if(calcular_tiempo(pTemp2.f_devolucion,'d') <= 0){
             cout << "El usuario no debe pagar nada\n";
             aux->pago_pend = 0;
 
         } else {
-            cout << "¡La devolución debió ser hace " << (calcular_tiempo(pTemp2->f_devolucion,'d')) << "días!\n";
-            cout << "El usuario debe pagar:" << 15000*floor(calcular_tiempo(pTemp2->f_devolucion,'d'));
-            aux->pago_pend = 15000*floor(calcular_tiempo(pTemp2->f_devolucion,'d'));
+            cout << "¡La devolución debió ser hace " << (calcular_tiempo(pTemp2.f_devolucion,'d')) << "días!\n";
+            cout << "El usuario debe pagar:" << 15000*floor(calcular_tiempo(pTemp2.f_devolucion,'d'));
+            aux->pago_pend = 15000*floor(calcular_tiempo(pTemp2.f_devolucion,'d'));
         }
     }
 
     system("pause");
 
     for (int i = 0; i < tam_libros; i++){
-        if(strcmp((l_libros+i)->id,pTemp2->id_libro) == 0){
+        if(strcmp((l_libros+i)->id,pTemp2.id_libro) == 0){
             (l_libros+i)->cant_copias++;
         }
     } 
@@ -870,7 +1074,6 @@ char* dar_fecha_actual(){
 void imprimir_devoluciones(devolucion* &l_devoluciones, int &tam){
     fflush(stdin);
     cout << setfill(' ') << left << setw(20) << "Id devolución" << setw(20) << "Fecha devolución" << "Pago/Saldo\n";
-
         if (tam != 0 && l_devoluciones != nullptr) {
             for(int i = 0; i < tam; i++){
             cout<< setfill(' ') << left << setw(20) << (l_devoluciones+i)->id_devolucion << setw(20) << (l_devoluciones+i)->f_devolucion
