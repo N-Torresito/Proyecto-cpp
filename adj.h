@@ -363,7 +363,7 @@ void cargar_datos(lista_m* &lista, fstream &in){
             }
         }
 
-        if(lista->l_prestamos != 0){
+        if(lista->cant_prestamo != 0){
             lista->l_prestamos = new prestamo[lista->cant_prestamo+1];
             for(int i = 0; i < lista->cant_prestamo; i++){
             in.read((char*) &*(lista->l_prestamos+i), sizeof(prestamo));
@@ -385,6 +385,81 @@ void cargar_datos(lista_m* &lista, fstream &in){
     in.close();
     cout << "Ha ocurrido un error al cargar los datos\n"; 
     cout << "Puede ser que no exista un archivo con los datos correspondientes o este corrupto\n";
+    cout << "¿Desea intentar cargar los datos desde el archivo de texto?(y/n)\n";
+    
+    char respuesta = 'n';
+    cin >> respuesta;
+    respuesta = tolower(respuesta);
+
+    if(respuesta == 'y'){
+        in.open("biblioteca.txt", ios::in);
+
+        if(!in.fail()){
+            in >> lista->cant_libros; in.ignore();
+            in >> lista->cant_usuarios; in.ignore();
+            in >> lista->cant_prestamo; in.ignore();
+            in >> lista->cant_devolucion; in.ignore();
+
+            if(lista->cant_libros != 0){
+                lista->l_libros = new libro[lista->cant_libros+1];
+                for(int i = 0; i < lista->cant_libros; i++){
+                    in.getline((lista->l_libros+i)->id,6,',');
+                    in.getline((lista->l_libros+i)->titulo,31,',');
+                    in.getline((lista->l_libros+i)->autor,26,',');
+                    in >> (lista->l_libros+i)->año_pub;
+                    in.ignore();
+                    in >> (lista->l_libros+i)->cant_copias;
+                    in.ignore();
+                }
+            }
+
+            if(lista->cant_usuarios != 0){
+                lista->l_usuarios = new usuario[lista->cant_usuarios+1];
+                for(int i = 0; i < lista->cant_usuarios; i++){
+                    in.getline((lista->l_usuarios+i)->nombre, 26, ',');
+                    in.getline((lista->l_usuarios+i)->f_nacimiento, 11 ,',');
+                    in.getline((lista->l_usuarios+i)->p_nacimiento, 21, ',');
+                    in.getline((lista->l_usuarios+i)->direccion, 31, ',');
+                    in.getline((lista->l_usuarios+i)->telefono, 11, ',');
+                    in >> (lista->l_usuarios+i)->t_id;
+                    in.ignore(1);
+                    in.getline((lista->l_usuarios+i)->id, 16, '\n');
+                }
+            }
+
+            if(lista->cant_prestamo  != 0){
+                lista->l_prestamos = new prestamo[lista->cant_prestamo+1];
+                for(int i = 0; i < lista->cant_prestamo; i++){
+                    in.getline((lista->l_prestamos+i)->id_prestamo, 4, ',');
+                    in.getline((lista->l_prestamos+i)->id_libro, 6, ',');
+                    in.getline((lista->l_prestamos+i)->id_usuario,16,',');
+                    in.getline((lista->l_prestamos+i)->f_prestamo, 11, ',');
+                    in.getline((lista->l_prestamos+i)->f_devolucion, 11);
+                }
+            }
+
+            if(lista->cant_devolucion != 0){
+                lista->l_devolucion = new devolucion[lista->cant_devolucion+1];
+                for(int i = 0; i < lista->cant_devolucion; i++){
+                    in.getline((lista->l_devolucion+i)->id_devolucion, 4, ',');
+                    in.getline((lista->l_devolucion+i)->id_prestamo, 4, ',');
+                    in.getline((lista->l_devolucion+i)->f_devolucion, 11, ',');
+                    in >> (lista->l_devolucion+i)->pago_pend;
+                    in.ignore();
+                }
+            }
+
+            in.close();
+            cout << "¡Se han cargado los datos desde el respaldo correctamente!\n";
+            system("pause");
+            return;
+        }
+        cout << "¡Ha ocurrido un error al cargar los datos desde el respaldo!\n";
+        cout << "Por favor llame a su tecnico de confianza o a soporte\n";
+        system("pause");
+        return;
+    } 
+    cout << "No se han cargado los datos y se ha rechazado la carga del respaldo\n";
     system("pause");
     return;
 }
@@ -426,11 +501,71 @@ void guardar_datos(lista_m* &lista, fstream &out){
         out.close();
     
         cout << "¡Datos guardados exitosamente!\n";
+    }  
+
+    out.close();
+
+    out.open("biblioteca.txt", ios::out);   
+
+    if (!out.fail()){
+
+        out << lista->cant_libros << endl;
+        out << lista->cant_usuarios << endl;
+        out << lista->cant_prestamo << endl;
+        out << lista->cant_devolucion << endl;
+        
+        if (lista->cant_libros != 0){
+            for(int i = 0; i < lista->cant_libros; i++){
+                out << (lista->l_libros+i)->id << ','
+                    << (lista->l_libros+i)->titulo << ','
+                    << (lista->l_libros+i)->autor << ','
+                    << (lista->l_libros+i)->año_pub << ','
+                    << (lista->l_libros+i)->cant_copias << endl;
+            }
+        }
+
+        if(lista->cant_usuarios != 0){
+            for(int i = 0; i < lista->cant_usuarios; i++){
+                out << (lista->l_usuarios+i)->nombre << ','
+                    << (lista->l_usuarios+i)->f_nacimiento << ','
+                    << (lista->l_usuarios+i)->p_nacimiento << ','
+                    << (lista->l_usuarios+i)->direccion << ','
+                    << (lista->l_usuarios+i)->telefono << ','
+                    << (lista->l_usuarios+i)->t_id << ','
+                    << (lista->l_usuarios+i)->id << endl;
+            }
+        }
+
+        if (lista->cant_prestamo != 0){
+            for(int i = 0; i < lista->cant_prestamo; i++){
+            out << (lista->l_prestamos+i)->id_prestamo << ','
+                << (lista->l_prestamos+i)->id_libro << ','
+                << (lista->l_prestamos+i)->id_usuario << ','
+                << (lista->l_prestamos+i)->f_prestamo << ','
+                << (lista->l_prestamos+i)->f_devolucion << endl;
+            }
+        }
+
+        if(lista->cant_devolucion != 0){
+            for(int i = 0; i < lista->cant_devolucion; i++){
+            out << (lista->l_devolucion+i)->id_devolucion << ','
+                << (lista->l_devolucion+i)->id_prestamo << ','
+                << (lista->l_devolucion+i)->f_devolucion << ','
+                << (lista->l_devolucion+i)->pago_pend << endl;
+            }
+        }
+
+        out.close();
+    
+        cout << "¡Respaldo guardado exitosamente!\n";
+        
         system("pause");  
         return;  
     }  
-    out.close();
-    cout << "Ha ocurrido un error al guardar los datos\n"; 
+
+
+    cout << "Ha ocurrido un error al guardar los datos\n";
+
     system("pause");
     return;
 }
