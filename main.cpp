@@ -2,7 +2,10 @@
 #include <fstream>
 #include <iomanip>
 #include <cstring>
+#include <time.h>
 #include <cmath>
+
+
 #include "adj.h"
 
 using namespace std;
