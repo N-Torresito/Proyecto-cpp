@@ -20,3 +20,4 @@ int main ()
     delete[] general;
     return 0;
 }
+

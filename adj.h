@@ -6,6 +6,7 @@
 #include <math.h>
 using namespace std;
 
+
 /*
 La manera en que se manejan los datos en el archivo binario y en el archivo de texto será de la siguiente forma:
 cantidad de libros
@@ -77,17 +78,17 @@ void visualizar_datos(lista_m* &lista);
 void cargar_datos(lista_m* &lista, fstream &in);
 void guardar_datos(lista_m* &lista, fstream &out);
 void agregar_libros(libro* &l_libros, int &tam);
+void agregar_usuarios(usuario* &l_usuarios, int &tam);
+void realizar_prestamo(prestamo* &l_prestamos, int &tam_prestamos, libro* &l_libros, int &tam_libros, usuario* &l_usuarios, int &tam_usuarios);
+void devolver_libros(devolucion* &l_devolucion, int &tam_devolucion, prestamo* &l_prestamos, int &tam_prestamo, usuario* &l_usuarios, int &tam_usuarios, libro* &l_libros, int tam);
 void visualizar_libros(libro* &l_libros, int tam);
 void imprimir_libros_disponibles(libro* &l_libros, int tam);
 void imprimir_libros_busqueda(libro* &l_libros, int tam);
 void imprimir_libros(libro* &l_libros, int tam);
 int calcular_tiempo(char* fecha, char select);
 void imprimir_usuarios(usuario* &l_usuarios, int tam);
-void agregar_usuarios(usuario* &l_usuarios, int &tam);
 void imprimir_prestamo(prestamo* &l_prestamo, int &tam);
-void realizar_prestamo(prestamo* &l_prestamos, int &tam_prestamos, libro* &l_libros, int &tam_libros, usuario* &l_usuarios, int &tam_usuarios);
 char* dar_fecha_actual();
-void devolver_libros(devolucion* &l_devolucion, int &tam_devolucion, prestamo* &l_prestamos, int &tam_prestamo, usuario* &l_usuarios, int &tam_usuarios, libro* &l_libros, int tam);
 void imprimir_devoluciones(devolucion* &l_devoluciones, int &tam);
 
 void menu(lista_m* &lista, fstream &in){
