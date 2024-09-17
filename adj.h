@@ -94,7 +94,7 @@ char* dar_fecha_actual();
 
 void menu(lista_m* &lista, fstream &in){
     fflush(stdin);
-    int select = 5;
+    int select = 8;
     do{
         system("cls");
         cout << setw(50)<< setfill('*') <<"*" << '\n';
@@ -130,11 +130,13 @@ void menu(lista_m* &lista, fstream &in){
             break;
 
         case 4:
-            realizar_prestamo(lista->l_prestamos, lista->cant_prestamo, lista->l_libros, lista->cant_libros, lista->l_usuarios, lista->cant_usuarios);
+            realizar_prestamo(lista->l_prestamos, lista->cant_prestamo, 
+            lista->l_libros, lista->cant_libros, lista->l_usuarios, lista->cant_usuarios);
             break;
 
         case 5:
-            devolver_libros(lista->l_devolucion, lista->cant_devolucion, lista->l_prestamos, lista->cant_prestamo, lista->l_usuarios, lista->cant_usuarios, lista->l_libros, lista->cant_libros);
+            devolver_libros(lista->l_devolucion, lista->cant_devolucion, lista->l_prestamos, 
+            lista->cant_prestamo, lista->l_usuarios, lista->cant_usuarios, lista->l_libros, lista->cant_libros);
             break;
 
         case 6:
@@ -156,7 +158,6 @@ void menu(lista_m* &lista, fstream &in){
 }
 
 void visualizar_datos(lista_m* &lista){
-    fflush(stdin);
     system("cls");
     int select;
     cout << "Ingrese que datos desea visualizar\n";
@@ -295,9 +296,10 @@ void agregar_usuarios(usuario* &l_usuarios, int &tam){
             cout << "Se ha detectado que el usuario es mayor de edad\n"
             << "Ingrese el tipo cedula del usuario 'C' para cédula de ciudadania, 'E' para cédula de extranjeria\n";
             cin.get(aux->t_id);
-        } else if (strcasecmp(aux->p_nacimiento, "Colombia") == 0 || strcasecmp(aux->p_nacimiento, "colombia") == 0)  {
+        } else if (strcasecmp(aux->p_nacimiento, "Colombia") == 0 || strcasecmp(aux->p_nacimiento, "colombia") == 0){
             cout << "Se ha detectado que el usuario es menor de edad y ciudadano Colombiano,"
                  << " se le ha asignado automaticamente I para tarjeta de identidad\n";
+            aux->t_id = 'I';
         } else {
             cout << "Se ha detectado que el usuario no cumple con los requisitos para ser registrado,"
                  << " saliendo del modulo de registro\n";
