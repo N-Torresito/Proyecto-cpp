@@ -1020,7 +1020,6 @@ int &tam_usuarios, libro* &l_libros, int tam_libros){
             aux->pago_pend = 15000*floor(calcular_tiempo(pTemp2.f_devolucion,'d'));
         }
     }
-
     system("pause");
 
     for (int i = 0; i < tam_libros; i++){
@@ -1042,6 +1041,7 @@ int &tam_usuarios, libro* &l_libros, int tam_libros){
         l_devolucion = copia;
         tam_devolucion++;
         cout << "Devolución exitosa!\n";
+        system("pause");
     }
 }
 
