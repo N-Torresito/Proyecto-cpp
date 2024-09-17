@@ -6,6 +6,7 @@
 #include <cmath>
 using namespace std;
 
+
 /*
 La manera en que se manejan los datos en el archivo binario y en el archivo de texto será de la siguiente forma:
 cantidad de libros
@@ -77,26 +78,27 @@ void visualizar_datos(lista_m* &lista);
 void cargar_datos(lista_m* &lista, fstream &in);
 void guardar_datos(lista_m* &lista, fstream &out);
 void agregar_libros(libro* &l_libros, int &tam);
+void agregar_usuarios(usuario* &l_usuarios, int &tam);
+void realizar_prestamo(prestamo* &l_prestamos, int &tam_prestamos, libro* &l_libros, int &tam_libros, usuario* &l_usuarios, int &tam_usuarios);
+void devolver_libros(devolucion* &l_devolucion, int &tam_devolucion, prestamo* &l_prestamos, int &tam_prestamo, usuario* &l_usuarios, int &tam_usuarios, libro* &l_libros, int tam);
 void visualizar_libros(libro* &l_libros, int tam);
 void imprimir_libros_disponibles(libro* &l_libros, int tam);
 void imprimir_libros_busqueda(libro* &l_libros, int tam);
 void imprimir_libros(libro* &l_libros, int tam);
-int calcular_tiempo(char* fecha, char select);
 void imprimir_usuarios(usuario* &l_usuarios, int tam);
-void agregar_usuarios(usuario* &l_usuarios, int &tam);
 void imprimir_prestamo(prestamo* &l_prestamo, int &tam);
-void realizar_prestamo(prestamo* &l_prestamos, int &tam_prestamos, libro* &l_libros, int &tam_libros, usuario* &l_usuarios, int &tam_usuarios);
-char* dar_fecha_actual();
-void devolver_libros(devolucion* &l_devolucion, int &tam_devolucion, prestamo* &l_prestamos, int &tam_prestamo, usuario* &l_usuarios, int &tam_usuarios, libro* &l_libros, int tam);
 void imprimir_devoluciones(devolucion* &l_devoluciones, int &tam);
+int calcular_tiempo(char* fecha, char select);
+char* dar_fecha_actual();
+
 
 void menu(lista_m* &lista, fstream &in){
     fflush(stdin);
-    int select = 5;
+    int select = 8;
     do{
         system("cls");
         cout << setw(50)<< setfill('*') <<"*" << '\n';
-        cout << setw(35) << setfill(' ') << right << "Gestion de Biblioteca V0.5" << '\n';
+        cout << setw(35) << setfill(' ') << right << "Gestion de Biblioteca V1.0" << '\n';
         cout << setw(50)<< setfill('*') <<"*" << "\n\n";
         cout << "Bienvenido/a, elija alguna opción\n\n";
 
@@ -128,11 +130,13 @@ void menu(lista_m* &lista, fstream &in){
             break;
 
         case 4:
-            realizar_prestamo(lista->l_prestamos, lista->cant_prestamo, lista->l_libros, lista->cant_libros, lista->l_usuarios, lista->cant_usuarios);
+            realizar_prestamo(lista->l_prestamos, lista->cant_prestamo, 
+            lista->l_libros, lista->cant_libros, lista->l_usuarios, lista->cant_usuarios);
             break;
 
         case 5:
-            devolver_libros(lista->l_devolucion, lista->cant_devolucion, lista->l_prestamos, lista->cant_prestamo, lista->l_usuarios, lista->cant_usuarios, lista->l_libros, lista->cant_libros);
+            devolver_libros(lista->l_devolucion, lista->cant_devolucion, lista->l_prestamos, 
+            lista->cant_prestamo, lista->l_usuarios, lista->cant_usuarios, lista->l_libros, lista->cant_libros);
             break;
 
         case 6:
@@ -290,9 +294,10 @@ void agregar_usuarios(usuario* &l_usuarios, int &tam){
             cout << "Se ha detectado que el usuario es mayor de edad\n"
             << "Ingrese el tipo cedula del usuario 'C' para cédula de ciudadania, 'E' para cédula de extranjeria\n";
             cin.get(aux->t_id);
-        } else if (strcasecmp(aux->p_nacimiento, "Colombia") == 0 || strcasecmp(aux->p_nacimiento, "colombia") == 0)  {
+        } else if (strcasecmp(aux->p_nacimiento, "Colombia") == 0 || strcasecmp(aux->p_nacimiento, "colombia") == 0){
             cout << "Se ha detectado que el usuario es menor de edad y ciudadano Colombiano,"
                  << " se le ha asignado automaticamente I para tarjeta de identidad\n";
+            aux->t_id = 'I';
         } else {
             cout << "Se ha detectado que el usuario no cumple con los requisitos para ser registrado,"
                  << " saliendo del modulo de registro\n";
@@ -839,8 +844,8 @@ void realizar_prestamo(prestamo* &l_prestamos, int &tam_prestamos, libro* &l_lib
     cin.ignore();
     cin.getline(aux->id_libro, 6);
 
-        cout << "Ingrese el Id del usuario\n";
-        cin.getline(aux->id_usuario, 16);
+    cout << "Ingrese el Id del usuario\n";
+    cin.getline(aux->id_usuario, 16);
 
         for (int i = 0; i < tam_usuarios; i++){
             if(strcmp((l_usuarios+i)->id,aux->id_usuario) == 0){
@@ -877,7 +882,7 @@ void realizar_prestamo(prestamo* &l_prestamos, int &tam_prestamos, libro* &l_lib
     cin.getline(aux->f_prestamo, 11);
 
     cout << "Ingrese la fecha de devolución esperada del prestamo(Formato aaaa/mm/dd, Ej. 2012/12/24)\n";
-    cin.getline(aux->f_devolucion, 21);
+    cin.getline(aux->f_devolucion, 11);
         
     if(tam_prestamos == 0){
         l_prestamos = aux;
