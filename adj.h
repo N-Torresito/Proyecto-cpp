@@ -850,8 +850,8 @@ void realizar_prestamo(prestamo* &l_prestamos, int &tam_prestamos, libro* &l_lib
     cin.ignore();
     cin.getline(aux->id_libro, 6);
 
-        cout << "Ingrese el Id del usuario\n";
-        cin.getline(aux->id_usuario, 16);
+    cout << "Ingrese el Id del usuario\n";
+    cin.getline(aux->id_usuario, 16);
 
         for (int i = 0; i < tam_usuarios; i++){
             if(strcmp((l_usuarios+i)->id,aux->id_usuario) == 0){
@@ -888,7 +888,7 @@ void realizar_prestamo(prestamo* &l_prestamos, int &tam_prestamos, libro* &l_lib
     cin.getline(aux->f_prestamo, 11);
 
     cout << "Ingrese la fecha de devolución esperada del prestamo(Formato aaaa/mm/dd, Ej. 2012/12/24)\n";
-    cin.getline(aux->f_devolucion, 21);
+    cin.getline(aux->f_devolucion, 11);
         
     if(tam_prestamos == 0){
         l_prestamos = aux;
