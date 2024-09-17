@@ -90,6 +90,8 @@ void imprimir_prestamo(prestamo* &l_prestamo, int &tam);
 void imprimir_devoluciones(devolucion* &l_devoluciones, int &tam);
 int calcular_tiempo(char* fecha, char select);
 char* dar_fecha_actual();
+void reporte_libros_atrasados(lista_m* &lista, fstream &out);
+int dias_entre_fechas(char* fecha1, char* fecha2);
 
 
 void menu(lista_m* &lista, fstream &in){
@@ -109,7 +111,9 @@ void menu(lista_m* &lista, fstream &in){
         cout << "5. Registrar Devoluciones\n";
         cout << "6. Guardar datos\n";
         cout << "7. Cargar datos\n";
-        cout << "8. Salir\n\n";
+        cout << "8. Generar reporte de libros atrasados\n";
+        cout << "9. Salir\n\n";
+
 
         cout << "Selección: ";
         cin >> select;
@@ -148,13 +152,18 @@ void menu(lista_m* &lista, fstream &in){
             break;
 
         case 8:
+            reporte_libros_atrasados(lista, in);
+            break;
+
+        case 9:
+            return;
             break;
 
         default:
             cout << "Opción invalida, ingrese otra opción\n";
             break;
         }
-    }while(select !=8 );
+    }while(select !=9 );
 }
 
 void visualizar_datos(lista_m* &lista){
@@ -387,6 +396,7 @@ void cargar_datos(lista_m* &lista, fstream &in){
         system("pause");
         return;
     }
+
     in.close();
     cout << "Ha ocurrido un error al cargar los datos\n"; 
     cout << "Puede ser que no exista un archivo con los datos correspondientes o este corrupto\n";
@@ -459,6 +469,7 @@ void cargar_datos(lista_m* &lista, fstream &in){
             system("pause");
             return;
         }
+
         cout << "¡Ha ocurrido un error al cargar los datos desde el respaldo!\n";
         cout << "Por favor llame a su tecnico de confianza o a soporte\n";
         system("pause");
@@ -567,8 +578,6 @@ void guardar_datos(lista_m* &lista, fstream &out){
         system("pause");  
         return;  
     }  
-
-
     cout << "Ha ocurrido un error al guardar los datos\n";
 
     system("pause");
@@ -918,17 +927,18 @@ void imprimir_prestamo(prestamo* &l_prestamo, int &tam){
     cout<< setfill(' ') << left << setw(12) << "Prestamo #" << setw(18) << "Usuario #" 
         << setw(10) << "Libro #" << setw(20) << "Fecha del Prestamo" << "Fecha de devolución" <<  endl;
 
-    if (tam != 0 && l_prestamo != nullptr) {
-        for(int i = 0; i < tam; i++){
-        cout<< setfill(' ') << left << setw(12) << (l_prestamo+i)->id_prestamo << setw(18) << (l_prestamo+i)->id_usuario 
-        << setw(10) << (l_prestamo+i)->id_libro << setw(20) << (l_prestamo+i)->f_prestamo << (l_prestamo+i)->f_devolucion << endl;
-        } 
-    } else {
-        cout << "No hay prestamos registrados\n";
+        if (tam != 0 && l_prestamo != nullptr) {
+            for(int i = 0; i < tam; i++){
+            cout<< setfill(' ') << left << setw(12) << (l_prestamo+i)->id_prestamo << setw(18) << (l_prestamo+i)->id_usuario 
+            << setw(10) << (l_prestamo+i)->id_libro << setw(20) << (l_prestamo+i)->f_prestamo << (l_prestamo+i)->f_devolucion << endl;
+            } 
+        } else {
+            cout << "No hay prestamos registrados\n";
+        }
+
+    cout<<endl;
+    system("pause");
     }
-cout<<endl;
-system("pause");
-}
 
 void devolver_libros(devolucion* &l_devolucion, int &tam_devolucion, prestamo* &l_prestamos, int &tam_prestamo, usuario* &l_usuarios, 
 int &tam_usuarios, libro* &l_libros, int tam_libros){
@@ -1079,4 +1089,110 @@ void imprimir_devoluciones(devolucion* &l_devoluciones, int &tam){
         }
     cout<<endl;
     system("pause");
+}
+
+struct atrasados{
+libro libro;
+usuario usuario;
+prestamo prestamo;
+devolucion devolucion;
+};
+
+void reporte_libros_atrasados(lista_m* &lista, fstream &out){
+    int cant_atrasados = 0;
+
+    for(int i = 0; i < lista->cant_devolucion; i++){
+        if((lista->l_devolucion+i)->pago_pend > 0){
+            cant_atrasados++;
+        }
+    }
+
+    atrasados* l_atrasados = new atrasados[cant_atrasados];
+    
+    for(int i = 0, j = 0; i < lista->cant_devolucion; i++){
+        if((lista->l_devolucion+i)->pago_pend > 0){
+            (l_atrasados+j)->devolucion = *(lista->l_devolucion+i);
+            j++;
+        }
+    }
+
+    for(int i = 0; i < lista->cant_prestamo; i++){
+        for(int j = 0; j < cant_atrasados; j++){
+            if(strcmp((l_atrasados+j)->devolucion.id_prestamo, (lista->l_prestamos+i)->id_prestamo) == 0){
+                (l_atrasados+j)->prestamo = *(lista->l_prestamos+i);
+            }
+        }
+    }
+
+    for(int i = 0; i < lista->cant_usuarios; i++){
+        for(int j = 0; j < cant_atrasados; j++){
+            if(strcmp((l_atrasados+j)->prestamo.id_usuario, (lista->l_usuarios+i)->id) == 0){
+                (l_atrasados+j)->usuario = *(lista->l_usuarios+i);
+            }
+        }
+    }
+
+    for(int i = 0; i < lista->cant_libros; i++){
+        for(int j = 0; j < cant_atrasados; j++){
+            if(strcmp((l_atrasados+j)->prestamo.id_libro, (lista->l_libros+i)->id) == 0){
+                (l_atrasados+j)->libro = *(lista->l_libros+i);
+            }
+        }
+    }
+
+    out.open("ReporteAtrasados.txt", ios::out);
+
+    if(!out.fail()){
+        out << right << setw(217) << setfill('-') << '\n';
+        out << left << setfill(' ') << setw(5) <<"ID" << setw(32) << "TITULO LIBRO" << setw(7) << "TIPO" 
+        << setw(18) << "IDENTIFICACIÓN" << setw(28) << "NOMBRE" << setw(19) << "FECHA NACIMIENTO"
+        << setw(6) << "EDAD" << setw(20) << "FECHA DEL PRESTAMO" << setw(23) << "FECHA DE DEVOLUCIÓN" 
+        << setw(23) << "FECHA LIBRO DEVUELTO" << setw(17) << "DIAS ATRASADOS" << "PRECIO TOTAL PAGADO" << '\n';
+        out << right << setw(217) << setfill('-') << '\n';
+        
+        for(int i = 0; i < cant_atrasados; i++){
+
+            out << left << setfill(' ') << setw(5) << (l_atrasados+i)->prestamo.id_prestamo << setw(32) << (l_atrasados+i)->libro.titulo << setw(7) << (l_atrasados+i)->usuario.t_id 
+        << setw(18) << (l_atrasados+i)->usuario.id << setw(28) << (l_atrasados+i)->usuario.nombre << setw(19) << (l_atrasados+i)->usuario.f_nacimiento
+        << setw(6) << floor(calcular_tiempo((l_atrasados+i)->usuario.f_nacimiento, 'a')) << setw(20) << (l_atrasados+i)->prestamo.f_prestamo << setw(23) << (l_atrasados+i)->prestamo.f_devolucion 
+        << setw(23) << (l_atrasados+i)->devolucion.f_devolucion << setw(17) << dias_entre_fechas((l_atrasados+i)->prestamo.f_devolucion, (l_atrasados+i)->devolucion.f_devolucion) << (l_atrasados+i)->devolucion.pago_pend << endl;
+        }
+
+        out.close();
+    
+            cout << "Se ha generado el reporte de libros atrasados\n";
+            system("pause");
+            return;
+    }
+
+    cout << "No se ha podido generar el reporte de libro atrasados\n";
+    system("pause");
+}
+
+int dias_entre_fechas(char* fecha1, char* fecha2){
+
+    char aux1[11];
+    strcpy(aux1, fecha1);
+    double dias1 = 0;
+    char* token1 = strtok(aux1, "/");
+    dias1 += ((atoi(token1))*12*30);
+    token1 = strtok(NULL, "/");
+    dias1 += (atoi(token1)*30);
+    token1 = strtok(NULL, "/");
+    dias1 += atoi(token1);
+    token1 = strtok(NULL, "/");
+    
+    char aux2[11];
+    strcpy(aux2, fecha2);
+     double dias2 = 0;
+    char* token2 = strtok(aux2, "/");
+    dias2 += ((atoi(token2))*12*30);
+    token2 = strtok(NULL, "/");
+    dias2 += (atoi(token2)*30);
+    token2 = strtok(NULL, "/");
+    dias2 += atoi(token2);
+    token2 = strtok(NULL, "/");
+
+   
+    return (dias2 - dias1);
 }
