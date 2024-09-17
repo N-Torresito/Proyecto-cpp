@@ -85,11 +85,12 @@ void visualizar_libros(libro* &l_libros, int tam);
 void imprimir_libros_disponibles(libro* &l_libros, int tam);
 void imprimir_libros_busqueda(libro* &l_libros, int tam);
 void imprimir_libros(libro* &l_libros, int tam);
-int calcular_tiempo(char* fecha, char select);
 void imprimir_usuarios(usuario* &l_usuarios, int tam);
 void imprimir_prestamo(prestamo* &l_prestamo, int &tam);
-char* dar_fecha_actual();
 void imprimir_devoluciones(devolucion* &l_devoluciones, int &tam);
+int calcular_tiempo(char* fecha, char select);
+char* dar_fecha_actual();
+
 
 void menu(lista_m* &lista, fstream &in){
     fflush(stdin);
@@ -97,7 +98,7 @@ void menu(lista_m* &lista, fstream &in){
     do{
         system("cls");
         cout << setw(50)<< setfill('*') <<"*" << '\n';
-        cout << setw(35) << setfill(' ') << right << "Gestion de Biblioteca V0.5" << '\n';
+        cout << setw(35) << setfill(' ') << right << "Gestion de Biblioteca V1.0" << '\n';
         cout << setw(50)<< setfill('*') <<"*" << "\n\n";
         cout << "Bienvenido/a, elija alguna opción\n\n";
 
