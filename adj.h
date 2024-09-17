@@ -930,7 +930,8 @@ cout<<endl;
 system("pause");
 }
 
-void devolver_libros(devolucion* &l_devolucion, int &tam_devolucion, prestamo* &l_prestamos, int &tam_prestamo, usuario* &l_usuarios, int &tam_usuarios, libro* &l_libros, int tam_libros){
+void devolver_libros(devolucion* &l_devolucion, int &tam_devolucion, prestamo* &l_prestamos, int &tam_prestamo, usuario* &l_usuarios, 
+int &tam_usuarios, libro* &l_libros, int tam_libros){
     devolucion* aux = new devolucion();
     bool existe = false;
     usuario pTemp;
@@ -989,7 +990,7 @@ void devolver_libros(devolucion* &l_devolucion, int &tam_devolucion, prestamo* &
 
         } else {
             cout << "¡La devolución debió ser hace " << floor(calcular_tiempo(pTemp2.f_devolucion,'d')) << "días!\n";
-            cout << "La tasa de demora diaría es de $2500 (Tasa adultos)\n\n";
+            cout << "La tasa de demora diaría es de $2500 (Tasa menores)\n\n";
             cout << "El usuario debe pagar: $" << 2500*floor(calcular_tiempo(pTemp2.f_devolucion,'d')) << "\n\n";
             aux->pago_pend = 2500*floor(calcular_tiempo(pTemp2.f_devolucion,'d'));
         }
